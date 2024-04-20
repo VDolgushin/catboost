@@ -12,6 +12,7 @@
 #include <catboost/private/libs/options/pool_metainfo_options.h>
 #include <catboost/libs/train_lib/train_model.h>
 #include <catboost/libs/train_lib/trainer_env.h>
+#include <catboost/libs/logging/logging.h>
 
 #if defined(USE_MPI)
 #include <catboost/cuda/cuda_lib/cuda_manager.h>
