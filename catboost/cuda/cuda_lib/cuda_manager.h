@@ -8,6 +8,7 @@
 #include "single_device.h"
 #include "devices_provider.h"
 #include <catboost/libs/logging/logging.h>
+#include <iostream>
 
 #include <util/generic/vector.h>
 
