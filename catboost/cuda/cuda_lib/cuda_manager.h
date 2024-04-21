@@ -195,7 +195,7 @@ namespace NCudaLib {
         inline void LaunchKernel(TKernel&& kernel,
                                  ui64 dev,
                                  ui32 stream) const {
-            CATBOOST_DEBUG_LOG << "Cuda manager launch kernel\n"
+            CATBOOST_DEBUG_LOG << "Cuda manager launch kernel\n";
             Y_ASSERT(dev < GetState().Devices.size());
             CB_ENSURE(IsActiveDevice[dev]);
             const ui32 devStreamId = StreamAt(stream, dev);
@@ -207,7 +207,7 @@ namespace NCudaLib {
         inline void LaunchKernels(TDevicesList&& devices,
                                   ui32 streamId,
                                   Args&&... args) {
-            CATBOOST_DEBUG_LOG << "Cuda manager launch kernels\n"                                   
+            CATBOOST_DEBUG_LOG << "Cuda manager launch kernels\n";                                   
             for (ui64 devId : devices) {
                 auto kernel = GetDeviceKernel<TKernel, Args...>(devId, args...);
                 LaunchKernel<TKernel>(std::move(kernel), devId, streamId);
