@@ -14,7 +14,8 @@
 
 int main(int argc, const char* argv[]) {
     try {
-        CATBOOST_DEBUG_LOG << "MAIN STARTED";
+        CATBOOST_DEBUG_LOG << "MAIN STARTED\n";
+        std::sout << "asdasdasdfasdfasdfasdf";
         NCB::TCmdLineInit::Do(argc, argv);
 
         TSetLoggingVerbose inThisScope;

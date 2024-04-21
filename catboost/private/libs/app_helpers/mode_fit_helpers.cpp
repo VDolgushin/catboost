@@ -40,7 +40,7 @@ int NCB::ModeFitImpl(int argc, const char* argv[]) {
     }
     #endif
     {
-        CATBOOST_DEBUG_LOG << "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+        CATBOOST_DEBUG_LOG << "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\n";
         NCatboostOptions::TPoolLoadParams poolLoadParams;
         TString paramsFile;
         NJson::TJsonValue catBoostFlatJsonOptions(NJson::JSON_MAP);
