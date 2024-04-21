@@ -37,6 +37,7 @@ int main(int argc, const char* argv[]) {
         modChooser.AddMode("dump-options", mode_dump_options, "dump training options");
         modChooser.DisableSvnRevisionOption();
         modChooser.SetVersionHandler(PrintProgramSvnVersion);
+        CATBOOST_DEBUG_LOG << "MAIN STARTED\n";
         return modChooser.Run(argc, argv);
     } catch (...) {
         Cerr << "AN EXCEPTION OCCURRED. " << CurrentExceptionMessage() << Endl;
