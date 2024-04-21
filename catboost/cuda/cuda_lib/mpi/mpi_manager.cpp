@@ -10,6 +10,7 @@
 
 namespace NCudaLib {
     void TMpiManager::Start(int* argc, char*** argv) {
+        CATBOOST_DEBUG_LOG << "Mpi manager start\n"
         int providedLevel;
         int threadLevel = MPI_THREAD_SERIALIZED;
 
@@ -74,9 +75,11 @@ namespace NCudaLib {
         }
 
         CB_ENSURE(HostCount >= 1, "Error: need at least one worker");
+        CATBOOST_DEBUG_LOG << "Mpi manager started\n"
     }
 
     void TMpiManager::Stop() {
+        CATBOOST_DEBUG_LOG << "Mpi manager stopping\n"
         if (IsMaster()) {
             NCudaLib::GetDevicesProvider().FreeDevices();
         }
@@ -84,12 +87,13 @@ namespace NCudaLib {
         AtomicSet(StopFlag, true);
         HasWorkEvent.Signal();
         MpiProxyThread->join();
-
+        CATBOOST_DEBUG_LOG << "Mpi manager stoped\n"
         MPI_SAFE_CALL(MPI_Finalize());
     }
 
     void TMpiManager::SendTask(const TDeviceId& deviceId,
                                TSerializedTask&& task) {
+        CATBOOST_DEBUG_LOG << "Mpi manager send task\n"
         Y_ASSERT(IsMaster());
         TSendTaskRequest request;
         request.DeviceId = deviceId;
@@ -99,6 +103,7 @@ namespace NCudaLib {
     }
 
     TMpiRequestPtr TMpiManager::ReadAsync(char* data, int dataSize, int sourceRank, int tag) {
+        CATBOOST_DEBUG_LOG << "Mpi manager read async\n"
         TMpiRequestPtr request = new TMpiRequest();
         TMemcpyReceiveRequest readRequest;
         readRequest.Request = request;
@@ -112,6 +117,7 @@ namespace NCudaLib {
     }
 
     TMpiRequestPtr TMpiManager::WriteAsync(const char* data, int dataSize, int destRank, int tag) {
+        CATBOOST_DEBUG_LOG << "Mpi manager write async\n"
         TMpiRequestPtr request = new TMpiRequest();
         TMemcpySendRequest sendRequest;
         sendRequest.Request = request;
@@ -125,6 +131,7 @@ namespace NCudaLib {
     }
 
     TMpiManager::TMpiRequest::EState TMpiManager::InvokeRunningRequest(TMpiRequest* request) {
+        CATBOOST_DEBUG_LOG << "Mpi manager invoke running request\n"
         if (request->CancelFlag == 1) {
             MPI_SAFE_CALL(MPI_Cancel(&(request->Request)));
             request->SetState(TMpiRequest::EState::Canceled);
@@ -152,6 +159,7 @@ namespace NCudaLib {
     }
 
     void TMpiManager::ProceedRequests() {
+        CATBOOST_DEBUG_LOG << "Mpi manager proceed reauests\n"
         bool isMaster = IsMaster();
         while (true) {
             HasWorkEvent.Reset();
@@ -171,6 +179,7 @@ namespace NCudaLib {
                         Y_ASSERT(size < (int)BufferSize);
                         Y_ASSERT(size);
 
+                        CATBOOST_DEBUG_LOG << "Mpi manager Bsend tasks\n"
                         if (UseBSendForTasks) {
                             MPI_SAFE_CALL(MPI_Bsend(request.Task.Data(), size, MPI_CHAR,
                                                     deviceId.HostId, GetTaskTag(deviceId),
@@ -198,6 +207,7 @@ namespace NCudaLib {
                     CB_ENSURE(readRequest.Request != nullptr, "Dequeued read request is nullptr");
                     Y_ASSERT(readRequest.Request->GetState() == TMpiRequest::EState::Created);
 
+                    CATBOOST_DEBUG_LOG << "Mpi manager Irecv request\n"
                     MPI_SAFE_CALL(MPI_Irecv(readRequest.Data, readRequest.DataSize,
                                             MPI_CHAR, readRequest.SourceRank, readRequest.Tag,
                                             Communicator,

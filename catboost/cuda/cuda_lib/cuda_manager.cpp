@@ -14,6 +14,8 @@ void TCudaManager::CreateProfiler() {
 }
 
 TCudaManager::~TCudaManager() noexcept(false) {
+    CATBOOST_DEBUG_LOG << "Cuda manager constructor\n";
+    std::cout << "Da da, log ne robiy";
     CB_ENSURE(Profiler == nullptr, "Reset profile before stopping cuda manager");
     CB_ENSURE(FreeStreams.size() == 0, "Error: CudaManager was not stopped");
     CB_ENSURE(Streams.size() == 0, "Error: CudaManager was not stopped");
@@ -30,6 +32,7 @@ void TCudaManager::ResetProfiler(bool printInfo) {
 }
 
 double TCudaManager::FreeMemoryMb(ui32 devId, bool waitComplete) const {
+    CATBOOST_DEBUG_LOG << "Cuda manager free memory\n";
     if (waitComplete) {
         GetCudaManager().WaitComplete();
     }
@@ -38,11 +41,13 @@ double TCudaManager::FreeMemoryMb(ui32 devId, bool waitComplete) const {
 }
 
 double TCudaManager::TotalMemoryMb(ui32 devId) const {
+    CATBOOST_DEBUG_LOG << "Cuda manager total memory\n";
     auto devPtr = GetState().Devices[devId];
     return devPtr->GetMemoryState().RequestedGpuRam * 1.0 / 1024 / 1024;
 }
 
 void TCudaManager::StopChild() {
+    CATBOOST_DEBUG_LOG << "Cuda manager stop child\n";
     CB_ENSURE(IsChildManager);
     CB_ENSURE(ParentProfiler != nullptr);
     //add stats from child to parent
@@ -62,6 +67,7 @@ void TCudaManager::StopChild() {
 void TCudaManager::StartChild(TCudaManager& parent,
                               const TDevicesList& devices,
                               TManualEvent& stopEvent) {
+    CATBOOST_DEBUG_LOG << "Cuda manager start child\n";
     CB_ENSURE(!State, "Error: can't start, state already exists");
     State = parent.State;
 
@@ -83,6 +89,7 @@ void TCudaManager::StartChild(TCudaManager& parent,
 
 template <class TPeersKernel>
 inline void TogglePeersKernel(TCudaManager& manager) {
+    CATBOOST_DEBUG_LOG << "Cuda manager toggle peers kernel\n";
     const ui64 deviceCount = manager.GetDeviceCount();
     for (ui64 dev = 0; dev < deviceCount; ++dev) {
         NCudaLib::TDeviceId myDevice = manager.GetDeviceId(dev);
@@ -100,14 +107,17 @@ inline void TogglePeersKernel(TCudaManager& manager) {
 }
 
 void TCudaManager::EnablePeers() {
+    CATBOOST_DEBUG_LOG << "Cuda manager enable peeers\n"
     TogglePeersKernel<NKernelHost::TEnablePeersKernel>(*this);
 }
 
 void TCudaManager::DisablePeers() {
+    CATBOOST_DEBUG_LOG << "Cuda manager disable peers\n"
     TogglePeersKernel<NKernelHost::TDisablePeersKernel>(*this);
 }
 
 void TCudaManager::FreeStream(const ui32 streamId) {
+    CATBOOST_DEBUG_LOG << "Cuda manager free stream\n"
     TDistributedObject<ui32>& stream = Streams[streamId];
 
     for (ui64 dev = 0; dev < State->Devices.size(); ++dev) {
@@ -121,6 +131,7 @@ void TCudaManager::FreeStream(const ui32 streamId) {
 }
 
 void TCudaManager::InitDefaultStream() {
+    CATBOOST_DEBUG_LOG << "Cuda manager init default stream\n"
     CB_ENSURE(Streams.size() == 0);
 
     ui32 defaultStream = 0;
@@ -135,6 +146,7 @@ void TCudaManager::InitDefaultStream() {
 }
 
 void TCudaManager::SetDevices(TVector<TCudaSingleDevice*>&& devices) {
+    CATBOOST_DEBUG_LOG << "Cuda manager set devices\n"
     CB_ENSURE(!HasDevices(), "Error: CudaManager already has devices");
     GetState().Devices = std::move(devices);
     CB_ENSURE(Streams.size() == 0);
@@ -148,6 +160,7 @@ void TCudaManager::SetDevices(TVector<TCudaSingleDevice*>&& devices) {
 }
 
 void TCudaManager::FreeDevices() {
+    CATBOOST_DEBUG_LOG << "Cuda manager free devices\n"
     auto& provider = GetDevicesProvider();
     for (auto dev : GetState().Devices) {
         provider.Free(dev);
@@ -157,6 +170,7 @@ void TCudaManager::FreeDevices() {
 }
 
 void TCudaManager::FreeComputationStreams() {
+    CATBOOST_DEBUG_LOG << "Cuda manager free streams\n"
     CB_ENSURE((1 + FreeStreams.size()) == Streams.size(), "Error: not all streams are free");
     for (int i = Streams.size() - 1; i > 0; --i) {
         FreeStream(i);
@@ -166,6 +180,7 @@ void TCudaManager::FreeComputationStreams() {
 }
 
 TVector<ui32> TCudaManager::GetDevices(bool onlyLocalIfHasAny) const {
+    CATBOOST_DEBUG_LOG << "Cuda manager get devices\n"
     TVector<ui32> devices;
     for (auto& dev : DevicesList) {
         if (onlyLocalIfHasAny && GetState().Devices[dev]->IsRemoteDevice()) {
@@ -182,6 +197,7 @@ TVector<ui32> TCudaManager::GetDevices(bool onlyLocalIfHasAny) const {
 }
 
 void TCudaManager::WaitComplete(TDevicesList&& devices) {
+    CATBOOST_DEBUG_LOG << "Cuda manager wait complete\n"
     using TEventPtr = THolder<IDeviceFuture<ui64>>;
     TVector<TEventPtr> waitComplete;
 
@@ -198,6 +214,7 @@ void TCudaManager::WaitComplete(TDevicesList&& devices) {
 }
 
 void TCudaManager::Start(const NCudaLib::TDeviceRequestConfig& config) {
+    CATBOOST_DEBUG_LOG << "Cuda manager start\n"
     CB_ENSURE(State == nullptr);
     State.Reset(new TCudaManagerState());
     CB_ENSURE(!HasDevices());
@@ -210,6 +227,7 @@ void TCudaManager::Start(const NCudaLib::TDeviceRequestConfig& config) {
 }
 
 void TCudaManager::Stop() {
+    CATBOOST_DEBUG_LOG << "Cuda manager stop\n"
     CB_ENSURE(!IsChildManager);
     CB_ENSURE(State);
 
@@ -225,6 +243,7 @@ void TCudaManager::Stop() {
 }
 
 TComputationStream TCudaManager::RequestStream() {
+    CATBOOST_DEBUG_LOG << "Cuda manager request stream\n"
     if (FreeStreams.size() == 0) {
         TDistributedObject<ui32> stream = CreateDistributedObject<ui32>();
         for (ui64 dev = 0; dev < stream.DeviceCount(); ++dev) {
@@ -244,6 +263,7 @@ TComputationStream TCudaManager::RequestStream() {
 }
 
 bool TCudaManager::HasRemoteDevices() const {
+    CATBOOST_DEBUG_LOG << "Cuda manager has remote devices\n"
     for (auto dev : State->Devices) {
         if (dev->IsRemoteDevice()) {
             return true;
@@ -254,6 +274,7 @@ bool TCudaManager::HasRemoteDevices() const {
 
 void RunSlave() {
 #if defined(USE_MPI)
+    CATBOOST_DEBUG_LOG << "Cuda manager run slave\n"
     THostDevices hostWorkers(GetMpiManager().GetHostId());
     TVector<TSingleHostTaskQueue*> workerQueues;
     for (ui32 i = 0; i < hostWorkers.GetDeviceCount(); ++i) {
@@ -283,6 +304,7 @@ inline void InitMemPerformanceTables(TCudaManager& manager) {
 THolder<TStopCudaManagerCallback> StartCudaManager(const NCudaLib::TDeviceRequestConfig& requestConfig,
                                                    const ELoggingLevel loggingLevel) {
     TSetLogging inThisScope(loggingLevel);
+    CATBOOST_DEBUG_LOG << "Cuda manager: start cuda manager\n"
 
 #if defined(USE_MPI)
     CB_ENSURE(GetMpiManager().IsMaster(), "Error: can't run cudaManager on slave");

@@ -14,8 +14,7 @@
 
 int main(int argc, const char* argv[]) {
     try {
-        CATBOOST_DEBUG_LOG << "MAIN STARTED\n";
-        std::cout << "asdasdasdfasdfasdfasdf";
+        std::cout << "MAIN STARTED\n";
         NCB::TCmdLineInit::Do(argc, argv);
 
         TSetLoggingVerbose inThisScope;
@@ -37,7 +36,7 @@ int main(int argc, const char* argv[]) {
         modChooser.AddMode("dump-options", mode_dump_options, "dump training options");
         modChooser.DisableSvnRevisionOption();
         modChooser.SetVersionHandler(PrintProgramSvnVersion);
-        CATBOOST_DEBUG_LOG << "MAIN STARTED\n";
+        std::cout << "MOD CHOOSER RUN\n";
         return modChooser.Run(argc, argv);
     } catch (...) {
         Cerr << "AN EXCEPTION OCCURRED. " << CurrentExceptionMessage() << Endl;

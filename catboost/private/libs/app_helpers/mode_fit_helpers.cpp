@@ -40,7 +40,7 @@ int NCB::ModeFitImpl(int argc, const char* argv[]) {
     }
     #endif
     {
-        CATBOOST_DEBUG_LOG << "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\n";
+        CATBOOST_DEBUG_LOG << "MODE FIT IMPLEMENTATION\n";
         NCatboostOptions::TPoolLoadParams poolLoadParams;
         TString paramsFile;
         NJson::TJsonValue catBoostFlatJsonOptions(NJson::JSON_MAP);
@@ -64,7 +64,7 @@ int NCB::ModeFitImpl(int argc, const char* argv[]) {
         NCatboostOptions::TOutputFilesOptions outputOptions;
         outputOptions.Load(outputOptionsJson);
         //Cout << LabeledOutput(outputOptions.UseBestModel.IsSet()) << Endl;
-
+        CATBOOST_DEBUG_LOG << "BEGIN TRAIN MODEL\n";
         TrainModel(poolLoadParams, outputOptions, catBoostJsonOptions);
     }
 
