@@ -19,6 +19,7 @@
 #include <util/system/event.h>
 #include <util/generic/queue.h>
 #include <thread>
+#include "nccl.h"
 
 namespace NCudaLib {
 #define MPI_SAFE_CALL(cmd)                                                   \
@@ -278,6 +279,7 @@ namespace NCudaLib {
         MPI_Comm Communicator;
         int HostCount;
         int HostId;
+        ncclUniqueId NcclId;
 
         TVector<NCudaLib::TDeviceId> Devices;
         TVector<NCudaLib::TCudaDeviceProperties> DeviceProps;

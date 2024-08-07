@@ -20,6 +20,8 @@ endif()
 
 project(CATBOOST LANGUAGES C CXX ASM)
 
+add_compile_definitions(-DUSE_MPI)
+
 set(BUILD_SHARED_LIBS Off)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_EXTENSIONS Off)
@@ -95,3 +97,25 @@ elseif (ANDROID AND CMAKE_ANDROID_ARCH STREQUAL "x86_64")
   include(CMakeLists.android-x86_64.txt)
 endif()
 
+find_package(MPI REQUIRED)
+# add this line only when you are using openmpi which has a different c++ bindings
+add_definitions(-DOMPI_SKIP_MPICXX)
+
+# Use imported targets would make things much eazier. Thanks Levi for pointing it out.
+target_include_directories(catboost
+ PRIVATE
+ ${MPI_C_INCLUDE_PATH})
+
+target_include_directories(catboost PRIVATE "/usr/include")
+
+target_link_directories(catboost PRIVATE "/usr/lib/x86_64-linux-gnu")
+
+target_link_libraries(catboost
+ PRIVATE
+ ${MPI_C_LIBRARIES}
+ nccl)
+
+target_compile_options(catboost PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:
+                       -lnccl
+                       -lmpi
+                       >)
