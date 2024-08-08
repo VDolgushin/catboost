@@ -23,7 +23,7 @@ namespace NCudaLib {
         if (HostId == 0) ncclGetUniqueId(&NcclId);
         MPI_SAFE_CALL(MPI_Bcast((void *)&NcclId, sizeof(NcclId), MPI_BYTE, 0, MPI_COMM_WORLD));
 
-        CATBOOST_DEBUG_LOG << "Host count: " << HostCount << " Host id: " << HostId << "NCCL ID: " << NcclId << Endl;
+        CATBOOST_DEBUG_LOG << "Host count: " << HostCount << " Host id: " << HostId << Endl;
         CommandsBuffer.resize(BufferSize);
         MPI_SAFE_CALL(MPI_Buffer_attach(CommandsBuffer.data(), CommandsBuffer.size()));
 
