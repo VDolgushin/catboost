@@ -280,6 +280,9 @@ namespace NCudaLib {
         int HostCount;
         int HostId;
         ncclUniqueId NcclId;
+        ncclComm_t NccclComm;
+        float *NcclSenBuff, *NcclRecvBuff;
+        cudaStream_t NcclCudaStream;
 
         TVector<NCudaLib::TDeviceId> Devices;
         TVector<NCudaLib::TCudaDeviceProperties> DeviceProps;

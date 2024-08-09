@@ -20,8 +20,13 @@ namespace NCudaLib {
         MPI_SAFE_CALL(MPI_Comm_size(Communicator, &HostCount));
         MPI_SAFE_CALL(MPI_Comm_rank(Communicator, &HostId));
 
+
+
         if (HostId == 0) ncclGetUniqueId(&NcclId);
         MPI_SAFE_CALL(MPI_Bcast((void *)&NcclId, sizeof(NcclId), MPI_BYTE, 0, MPI_COMM_WORLD));
+        ncclCommInitRank(&NccclComm, HostCount, NcclId, HostId);
+
+
 
         CATBOOST_DEBUG_LOG << "Host count: " << HostCount << " Host id: " << HostId << Endl;
         CommandsBuffer.resize(BufferSize);
