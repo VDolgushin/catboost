@@ -35,6 +35,24 @@ namespace NCudaLib {
         }                                                                    \
     }
 
+#define NCCLCHECK(cmd) do {                         \
+  ncclResult_t r = cmd;                             \
+  if (r!= ncclSuccess) {                            \
+    printf("Failed, NCCL error %s:%d '%s'\n",             \
+        __FILE__,__LINE__,ncclGetErrorString(r));   \
+    exit(EXIT_FAILURE);                             \
+  }                                                 \
+} while(0)
+
+#define CUDACHECK(cmd) do {                         \
+  cudaError_t e = cmd;                              \
+  if( e != cudaSuccess ) {                          \
+    printf("Failed: Cuda error %s:%d '%s'\n",             \
+        __FILE__,__LINE__,cudaGetErrorString(e));   \
+    exit(EXIT_FAILURE);                             \
+  }                                                 \
+} while(0)
+
     /*
      * This  manager is designed to work correctly only for computation model used in cuda_lib routines
      * It's not general-use class (at least currently) and should not be used anywhere outside cuda_lib
@@ -249,6 +267,26 @@ namespace NCudaLib {
             return CompressCodec;
         }
 
+        static uint64_t getHostHash(const char* string) {
+        // Based on DJB2a, result = result * 33 ^ char
+        uint64_t result = 5381;
+        for (int c = 0; string[c] != '\0'; c++){
+            result = ((result << 5) + result) ^ string[c];
+        }
+        return result;
+        }
+
+        static void getHostName(char* hostname, int maxlen) {
+        gethostname(hostname, maxlen);
+        for (int i=0; i< maxlen; i++) {
+            if (hostname[i] == '.') {
+                hostname[i] = '\0';
+                return;
+            }
+        }
+        }
+
+
     private:
         //Every MPI operations are done via proxy thread.
         struct TMemcpySendRequest {
@@ -279,10 +317,12 @@ namespace NCudaLib {
         MPI_Comm Communicator;
         int HostCount;
         int HostId;
+
         ncclUniqueId NcclId;
         ncclComm_t NccclComm;
         float *NcclSenBuff, *NcclRecvBuff;
         cudaStream_t NcclCudaStream;
+        int NcclLocalRank;
 
         TVector<NCudaLib::TDeviceId> Devices;
         TVector<NCudaLib::TCudaDeviceProperties> DeviceProps;
