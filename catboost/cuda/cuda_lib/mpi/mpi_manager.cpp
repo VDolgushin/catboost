@@ -28,7 +28,7 @@ namespace NCudaLib {
 
 
 
-        CATBOOST_DEBUG_LOG << "Host count: " << HostCount << " Host id: " << HostId << Endl;
+        CATBOOST_DEBUG_LOG << "Host count: " << HostCount << " Host id: " << HostId << " UPDATED"<< << Endl;
         CommandsBuffer.resize(BufferSize);
         MPI_SAFE_CALL(MPI_Buffer_attach(CommandsBuffer.data(), CommandsBuffer.size()));
 
