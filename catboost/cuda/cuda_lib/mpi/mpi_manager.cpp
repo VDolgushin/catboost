@@ -21,7 +21,7 @@ namespace NCudaLib {
         MPI_SAFE_CALL(MPI_Comm_rank(Communicator, &HostId));
 
 
-        uint64_t hostHashs[nRanks];
+        uint64_t hostHashs[HostCount];
         char hostname[1024];
         getHostName(hostname, 1024);
         hostHashs[HostId] = getHostHash(hostname);
