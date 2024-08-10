@@ -40,7 +40,7 @@ namespace NCudaLib {
         ncclCommInitRank(&NccclComm, HostCount, NcclId, HostId);
 
 
-        CATBOOST_DEBUG_LOG << "Host count: " << HostCount << " Host id: " << HostId << " Local rank: " << NcclLocalRank << " UPDATED "<< "Buffer size: "<< BufferSize << Endl;
+        CATBOOST_DEBUG_LOG << "Host count: " << HostCount << " Host id: " << HostId << " Local rank: " << NcclLocalRank << " UPDATED "<< << Endl;
         CommandsBuffer.resize(BufferSize);
         MPI_SAFE_CALL(MPI_Buffer_attach(CommandsBuffer.data(), CommandsBuffer.size()));
 
