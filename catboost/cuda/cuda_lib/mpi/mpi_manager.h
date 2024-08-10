@@ -320,7 +320,7 @@ namespace NCudaLib {
 
         ncclUniqueId NcclId;
         ncclComm_t NccclComm;
-        float *NcclSenBuff, *NcclRecvBuff;
+        char *NcclSenBuff, *NcclRecvBuff;
         cudaStream_t NcclCudaStream;
         int NcclLocalRank;
 
