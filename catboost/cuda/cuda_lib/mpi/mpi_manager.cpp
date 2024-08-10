@@ -33,10 +33,9 @@ namespace NCudaLib {
 
         if (HostId == 0) ncclGetUniqueId(&NcclId);
         MPI_SAFE_CALL(MPI_Bcast((void *)&NcclId, sizeof(NcclId), MPI_BYTE, 0, Communicator));
-        int size = 32*1024*1024;
         CUDACHECK(cudaSetDevice(NcclLocalRank));
-        CUDACHECK(cudaMalloc(&NcclSenBuff, size * sizeof(char)));
-        CUDACHECK(cudaMalloc(&NcclRecvBuff, size * sizeof(char)));
+        CUDACHECK(cudaMalloc(&NcclSenBuff, BufferSize * sizeof(char)));
+        CUDACHECK(cudaMalloc(&NcclRecvBuff, BufferSize * sizeof(char)));
         CUDACHECK(cudaStreamCreate(&NcclCudaStream));
         ncclCommInitRank(&NccclComm, HostCount, NcclId, HostId);
 
