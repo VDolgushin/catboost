@@ -191,8 +191,11 @@ namespace NCudaLib {
                         const int size = static_cast<const int>(request.Task.Size());
                         Y_ASSERT(size < (int)BufferSize);
                         Y_ASSERT(size);
+
+                        CATBOOST_DEBUG_LOG << "NCCLSEND APRICOT OK APRICOT BEGIN" << Endl;
                         ncclSend(request.Task.Data(), size, ncclChar, 1, NccclComm, NcclCudaStream);
-                        CATBOOST_DEBUG_LOG << "APRICOT OK APRICOT" << Endl;
+                        CATBOOST_DEBUG_LOG << "NCCLSEND APRICOT OK APRICOT END" << Endl;
+
                         if (UseBSendForTasks) {
                             MPI_SAFE_CALL(MPI_Bsend(request.Task.Data(), size, MPI_CHAR,
                                                     deviceId.HostId, GetTaskTag(deviceId),
@@ -219,6 +222,10 @@ namespace NCudaLib {
                     CB_ENSURE(rc, "Dequeue from receive requests failed");
                     CB_ENSURE(readRequest.Request != nullptr, "Dequeued read request is nullptr");
                     Y_ASSERT(readRequest.Request->GetState() == TMpiRequest::EState::Created);
+
+                    CATBOOST_DEBUG_LOG << "NCCLRECV APRICOT OK APRICOT BEGIN" << Endl;
+                    ncclRecv(readRequest.Data, readRequest.DataSize, ncclChar, 0, NccclComm, NcclCudaStream);
+                    CATBOOST_DEBUG_LOG << "NCCLRECV APRICOT OK APRICOT END" << Endl;
 
                     MPI_SAFE_CALL(MPI_Irecv(readRequest.Data, readRequest.DataSize,
                                             MPI_CHAR, readRequest.SourceRank, readRequest.Tag,
