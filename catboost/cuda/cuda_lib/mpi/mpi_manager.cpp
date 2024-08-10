@@ -191,12 +191,13 @@ namespace NCudaLib {
                         const int size = static_cast<const int>(request.Task.Size());
                         Y_ASSERT(size < (int)BufferSize);
                         Y_ASSERT(size);
-
                         if (UseBSendForTasks) {
+                            CATBOOST_DEBUG_LOG << "APRICOT BSEND" << Endl;
                             MPI_SAFE_CALL(MPI_Bsend(request.Task.Data(), size, MPI_CHAR,
                                                     deviceId.HostId, GetTaskTag(deviceId),
                                                     Communicator));
                         } else {
+                            CATBOOST_DEBUG_LOG << "APRICOT SEND" << Endl;
                             MPI_SAFE_CALL(MPI_Send(request.Task.Data(), size, MPI_CHAR,
                                                    deviceId.HostId, GetTaskTag(deviceId),
                                                    Communicator));
