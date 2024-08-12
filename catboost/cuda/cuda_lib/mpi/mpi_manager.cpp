@@ -263,8 +263,8 @@ namespace NCudaLib {
                                              writeRequest.Tag, Communicator,
                                              &writeRequest.Request->Request));
 
-                    if(GwriteRequest.Tag != 1){
-                        CATBOOST_DEBUG_LOG << "APRICOT ALERT ISSEND TAG: " << GetTaskTag(deviceId) << Endl;
+                    if(GetTaskTag(deviceId) != 1){
+                        CATBOOST_DEBUG_LOG << "APRICOT ALERT BSEND TAG: " << GetTaskTag(deviceId) << Endl;
                     }
 
                     writeRequest.Request->SetState(TMpiRequest::EState::Running);
