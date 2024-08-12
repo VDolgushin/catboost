@@ -21,26 +21,26 @@ namespace NCudaLib {
         MPI_SAFE_CALL(MPI_Comm_rank(Communicator, &HostId));
 
 
-        uint64_t hostHashs[HostCount];
-        char hostname[1024];
-        getHostName(hostname, 1024);
-        hostHashs[HostId] = getHostHash(hostname);
-        MPI_SAFE_CALL(MPI_Allgather(MPI_IN_PLACE, 0, MPI_DATATYPE_NULL, hostHashs, sizeof(uint64_t), MPI_BYTE, Communicator));
-        for (int p=0; p<HostCount; p++) {
-            if (p == HostId) break;
-            if (hostHashs[p] == hostHashs[HostId]) NcclLocalRank++;
-        }
+        // uint64_t hostHashs[HostCount];
+        // char hostname[1024];
+        // getHostName(hostname, 1024);
+        // hostHashs[HostId] = getHostHash(hostname);
+        // MPI_SAFE_CALL(MPI_Allgather(MPI_IN_PLACE, 0, MPI_DATATYPE_NULL, hostHashs, sizeof(uint64_t), MPI_BYTE, Communicator));
+        // for (int p=0; p<HostCount; p++) {
+        //     if (p == HostId) break;
+        //     if (hostHashs[p] == hostHashs[HostId]) NcclLocalRank++;
+        // }
 
         if (HostId == 0) ncclGetUniqueId(&NcclId);
         MPI_SAFE_CALL(MPI_Bcast((void *)&NcclId, sizeof(NcclId), MPI_BYTE, 0, Communicator));
-        CUDACHECK(cudaSetDevice(NcclLocalRank));
+        //CUDACHECK(cudaSetDevice(NcclLocalRank));
         CUDACHECK(cudaMalloc(&NcclSenBuff, BufferSize * sizeof(char)));
         CUDACHECK(cudaMalloc(&NcclRecvBuff, BufferSize * sizeof(char)));
         CUDACHECK(cudaStreamCreate(&NcclCudaStream));
         ncclCommInitRank(&NccclComm, HostCount, NcclId, HostId);
 
 
-        CATBOOST_DEBUG_LOG << "Host count: " << HostCount << " Host id: " << HostId << " Local rank: " << NcclLocalRank << " UPDATED " << Endl;
+        CATBOOST_DEBUG_LOG << "Host count: " << HostCount << " Host id: " << HostId << " UPDATED " << Endl;
         CommandsBuffer.resize(BufferSize);
         MPI_SAFE_CALL(MPI_Buffer_attach(CommandsBuffer.data(), CommandsBuffer.size()));
 
@@ -224,7 +224,7 @@ namespace NCudaLib {
                     Y_ASSERT(readRequest.Request->GetState() == TMpiRequest::EState::Created);
 
                     CATBOOST_DEBUG_LOG << "NCCLRECV APRICOT OK APRICOT BEGIN" << Endl;
-                    ncclRecv(readRequest.Data, readRequest.DataSize, ncclChar, 0, NccclComm, NcclCudaStream);
+                    //ncclRecv(readRequest.Data, readRequest.DataSize, ncclChar, 0, NccclComm, NcclCudaStream);
                     CATBOOST_DEBUG_LOG << "NCCLRECV APRICOT OK APRICOT END" << Endl;
 
                     MPI_SAFE_CALL(MPI_Irecv(readRequest.Data, readRequest.DataSize,
