@@ -223,9 +223,9 @@ namespace NCudaLib {
                     CB_ENSURE(readRequest.Request != nullptr, "Dequeued read request is nullptr");
                     Y_ASSERT(readRequest.Request->GetState() == TMpiRequest::EState::Created);
 
-                    CATBOOST_DEBUG_LOG << "NCCLRECV APRICOT OK APRICOT BEGIN" << Endl;
+                    //CATBOOST_DEBUG_LOG << "NCCLRECV APRICOT OK APRICOT BEGIN" << Endl;
                     //ncclRecv(readRequest.Data, readRequest.DataSize, ncclChar, 0, NccclComm, NcclCudaStream);
-                    CATBOOST_DEBUG_LOG << "NCCLRECV APRICOT OK APRICOT END" << Endl;
+                    //CATBOOST_DEBUG_LOG << "NCCLRECV APRICOT OK APRICOT END" << Endl;
 
                     MPI_SAFE_CALL(MPI_Irecv(readRequest.Data, readRequest.DataSize,
                                             MPI_CHAR, readRequest.SourceRank, readRequest.Tag,
