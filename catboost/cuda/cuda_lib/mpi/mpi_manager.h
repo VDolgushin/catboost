@@ -322,7 +322,7 @@ namespace NCudaLib {
         ncclComm_t NccclComm;
         char *NcclSenBuff, *NcclRecvBuff;
         cudaStream_t NcclCudaStream;
-        int NcclLocalRank;
+        //int NcclLocalRank;
 
         TVector<NCudaLib::TDeviceId> Devices;
         TVector<NCudaLib::TCudaDeviceProperties> DeviceProps;
