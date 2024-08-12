@@ -204,7 +204,10 @@ namespace NCudaLib {
                             MPI_SAFE_CALL(MPI_Send(request.Task.Data(), size, MPI_CHAR,
                                                    deviceId.HostId, GetTaskTag(deviceId),
                                                    Communicator));
-                            CATBOOST_DEBUG_LOG << "SEND TAG: " << GetTaskTag(deviceId) << Endl;
+
+                            if(GetTaskTag(deviceId) != 1){
+                                CATBOOST_DEBUG_LOG << "APRICOT ALERT SEND TAG: " << GetTaskTag(deviceId) << Endl;
+                            }
                         }
 
                     } else {
@@ -232,6 +235,10 @@ namespace NCudaLib {
                                             MPI_CHAR, readRequest.SourceRank, readRequest.Tag,
                                             Communicator,
                                             &readRequest.Request->Request));
+                                            
+                    if(readRequest.Tag != 1){
+                        CATBOOST_DEBUG_LOG << "APRICOT ALERT RECV TAG: " << readRequest.Tag << Endl;
+                    }
 
                     readRequest.Request->SetState(TMpiRequest::EState::Running);
                     if (InvokeRunningRequest(readRequest.Request.Get()) == TMpiRequest::EState::Running) {
