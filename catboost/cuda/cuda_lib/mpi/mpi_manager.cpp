@@ -10,6 +10,8 @@
 
 namespace NCudaLib {
     void TMpiManager::Start(int* argc, char*** argv) {
+        CATBOOST_DEBUG_LOG << "APRICOT START" << Endl;
+
         int providedLevel;
         int threadLevel = MPI_THREAD_SERIALIZED;
 
@@ -98,6 +100,8 @@ namespace NCudaLib {
     }
 
     void TMpiManager::Stop() {
+        CATBOOST_DEBUG_LOG << "APRICOT STOP" << Endl;
+
         if (IsMaster()) {
             NCudaLib::GetDevicesProvider().FreeDevices();
         }
@@ -111,6 +115,8 @@ namespace NCudaLib {
 
     void TMpiManager::SendTask(const TDeviceId& deviceId,
                                TSerializedTask&& task) {
+        CATBOOST_DEBUG_LOG << "APRICOT SEND TASK" << Endl;
+
         Y_ASSERT(IsMaster());
         TSendTaskRequest request;
         request.DeviceId = deviceId;
@@ -120,6 +126,8 @@ namespace NCudaLib {
     }
 
     TMpiRequestPtr TMpiManager::ReadAsync(char* data, int dataSize, int sourceRank, int tag) {
+        CATBOOST_DEBUG_LOG << "APRICOT READ ASYNC" << Endl;
+
         TMpiRequestPtr request = new TMpiRequest();
         TMemcpyReceiveRequest readRequest;
         readRequest.Request = request;
@@ -133,6 +141,8 @@ namespace NCudaLib {
     }
 
     TMpiRequestPtr TMpiManager::WriteAsync(const char* data, int dataSize, int destRank, int tag) {
+        CATBOOST_DEBUG_LOG << "APRICOT WRITE ASYNC" << Endl;
+
         TMpiRequestPtr request = new TMpiRequest();
         TMemcpySendRequest sendRequest;
         sendRequest.Request = request;
@@ -146,6 +156,8 @@ namespace NCudaLib {
     }
 
     TMpiManager::TMpiRequest::EState TMpiManager::InvokeRunningRequest(TMpiRequest* request) {
+        CATBOOST_DEBUG_LOG << "APRICOT INVOKE RUNNING REQUEST" << Endl;
+
         if (request->CancelFlag == 1) {
             MPI_SAFE_CALL(MPI_Cancel(&(request->Request)));
             request->SetState(TMpiRequest::EState::Canceled);
@@ -173,6 +185,8 @@ namespace NCudaLib {
     }
 
     void TMpiManager::ProceedRequests() {
+        CATBOOST_DEBUG_LOG << "APRICOT INVOKE PROCEED REQUESTS" << Endl;
+
         bool isMaster = IsMaster();
         while (true) {
             HasWorkEvent.Reset();
@@ -200,18 +214,10 @@ namespace NCudaLib {
                             MPI_SAFE_CALL(MPI_Bsend(request.Task.Data(), size, MPI_CHAR,
                                                     deviceId.HostId, GetTaskTag(deviceId),
                                                     Communicator));
-
-                            if(GetTaskTag(deviceId) != 1){
-                                CATBOOST_DEBUG_LOG << "APRICOT ALERT BSEND TAG: " << GetTaskTag(deviceId) << Endl;
-                            }
                         } else {
                             MPI_SAFE_CALL(MPI_Send(request.Task.Data(), size, MPI_CHAR,
                                                    deviceId.HostId, GetTaskTag(deviceId),
                                                    Communicator));
-
-                            if(GetTaskTag(deviceId) != 1){
-                                CATBOOST_DEBUG_LOG << "APRICOT ALERT SEND TAG: " << GetTaskTag(deviceId) << Endl;
-                            }
                         }
 
                     } else {
@@ -240,9 +246,9 @@ namespace NCudaLib {
                                             Communicator,
                                             &readRequest.Request->Request));
 
-                    if(readRequest.Tag != 1){
-                        CATBOOST_DEBUG_LOG << "APRICOT ALERT RECV TAG: " << readRequest.Tag << Endl;
-                    }
+                    // if(readRequest.Tag != 1){
+                    //     CATBOOST_DEBUG_LOG << "APRICOT ALERT RECV TAG: " << readRequest.Tag << Endl;
+                    // }
 
                     readRequest.Request->SetState(TMpiRequest::EState::Running);
                     if (InvokeRunningRequest(readRequest.Request.Get()) == TMpiRequest::EState::Running) {
@@ -263,9 +269,9 @@ namespace NCudaLib {
                                              writeRequest.Tag, Communicator,
                                              &writeRequest.Request->Request));
 
-                    if(writeRequest.Tag != 1){
-                        CATBOOST_DEBUG_LOG << "APRICOT ALERT ISSEND TAG: " << writeRequest.Tag << Endl;
-                    }
+                    // if(writeRequest.Tag != 1){
+                    //     CATBOOST_DEBUG_LOG << "APRICOT ALERT ISSEND TAG: " << writeRequest.Tag << Endl;
+                    // }
 
                     writeRequest.Request->SetState(TMpiRequest::EState::Running);
                     if (InvokeRunningRequest(writeRequest.Request.Get()) == TMpiRequest::EState::Running) {
