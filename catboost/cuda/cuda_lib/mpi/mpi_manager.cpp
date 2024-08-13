@@ -156,7 +156,7 @@ namespace NCudaLib {
     }
 
     TMpiManager::TMpiRequest::EState TMpiManager::InvokeRunningRequest(TMpiRequest* request) {
-        CATBOOST_DEBUG_LOG << "APRICOT INVOKE RUNNING REQUEST" << Endl;
+        //CATBOOST_DEBUG_LOG << "APRICOT INVOKE RUNNING REQUEST" << Endl;
 
         if (request->CancelFlag == 1) {
             MPI_SAFE_CALL(MPI_Cancel(&(request->Request)));
@@ -185,7 +185,7 @@ namespace NCudaLib {
     }
 
     void TMpiManager::ProceedRequests() {
-        CATBOOST_DEBUG_LOG << "APRICOT INVOKE PROCEED REQUESTS" << Endl;
+        CATBOOST_DEBUG_LOG << "APRICOT PROCEED REQUESTS" << Endl;
 
         bool isMaster = IsMaster();
         while (true) {
