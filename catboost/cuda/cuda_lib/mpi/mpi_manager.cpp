@@ -115,7 +115,7 @@ namespace NCudaLib {
 
     void TMpiManager::SendTask(const TDeviceId& deviceId,
                                TSerializedTask&& task) {
-        CATBOOST_DEBUG_LOG << "APRICOT SEND TASK" << Endl;
+        //CATBOOST_DEBUG_LOG << "APRICOT SEND TASK" << Endl;
 
         Y_ASSERT(IsMaster());
         TSendTaskRequest request;
@@ -126,7 +126,7 @@ namespace NCudaLib {
     }
 
     TMpiRequestPtr TMpiManager::ReadAsync(char* data, int dataSize, int sourceRank, int tag) {
-        CATBOOST_DEBUG_LOG << "APRICOT READ ASYNC" << Endl;
+        //CATBOOST_DEBUG_LOG << "APRICOT READ ASYNC" << Endl;
 
         TMpiRequestPtr request = new TMpiRequest();
         TMemcpyReceiveRequest readRequest;
@@ -141,7 +141,7 @@ namespace NCudaLib {
     }
 
     TMpiRequestPtr TMpiManager::WriteAsync(const char* data, int dataSize, int destRank, int tag) {
-        CATBOOST_DEBUG_LOG << "APRICOT WRITE ASYNC" << Endl;
+        //CATBOOST_DEBUG_LOG << "APRICOT WRITE ASYNC" << Endl;
 
         TMpiRequestPtr request = new TMpiRequest();
         TMemcpySendRequest sendRequest;

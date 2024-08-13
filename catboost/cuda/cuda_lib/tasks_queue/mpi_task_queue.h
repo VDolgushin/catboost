@@ -79,6 +79,9 @@ namespace NCudaLib {
         void ReceiveNextTaskAsync(ui32 i) {
             TSerializedTask& buffer = TaskBuffer[i];
             Y_ASSERT(Requests[i] == nullptr || (Requests[i]) && Requests[i]->IsComplete());
+
+            CATBOOST_DEBUG_LOG << "APRICOT MPI TASK QUEUE READ ASYNC" << Endl;
+
             Requests[i] = Manager.ReadAsync(buffer.Data(),
                                             static_cast<int>(buffer.Size()),
                                             Manager.GetMasterId(),
@@ -124,6 +127,9 @@ namespace NCudaLib {
             TSerializedTask serializedTask;
             TBufferOutput out(serializedTask);
             TTaskSerializer::SaveCommand(task, &out);
+
+            CATBOOST_DEBUG_LOG << "APRICOT MPI TASK QUEUE SENT TASK"  << Endl;
+
             Manager.SendTask(DeviceId,
                              std::move(serializedTask));
         }
