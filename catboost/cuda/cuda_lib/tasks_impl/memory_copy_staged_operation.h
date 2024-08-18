@@ -98,7 +98,7 @@ namespace NCudaLib {
                 const ui64 size = Min<ui64>(Size, State.BlockSize);
                 const ui32 receiveSize = UseCompression ? sizeof(T) * State.ReservedSize : sizeof(T) * size;
 
-                CATBOOST_DEBUG_LOG << "APRICOT MEMORY COPY STAGE OPERATION READ ASYNC 1" << Endl;
+                //CATBOOST_DEBUG_LOG << "APRICOT MEMORY COPY STAGE OPERATION READ ASYNC 1" << Endl;
                 State.ReadDoneEvent = State.Manager->ReadAsync((char*)State.ReadBuffer.Get(),
                                                                receiveSize,
                                                                RemoteHost,
@@ -133,7 +133,7 @@ namespace NCudaLib {
                 if (readOffset < Size) {
                     const ui64 size = Min<ui64>(Size - readOffset, State.BlockSize);
                     const ui32 receiveSize = UseCompression ? sizeof(T) * State.ReservedSize : sizeof(T) * size;
-                    CATBOOST_DEBUG_LOG << "APRICOT MEMORY COPY STAGE OPERATION READ ASYNC 2" << Endl;
+                    //CATBOOST_DEBUG_LOG << "APRICOT MEMORY COPY STAGE OPERATION READ ASYNC 2" << Endl;
                     State.ReadDoneEvent = State.Manager->ReadAsync((char*)State.ReadBuffer.Get(),
                                                                    receiveSize,
                                                                    RemoteHost,
@@ -274,7 +274,7 @@ namespace NCudaLib {
                 }
 
                 {
-                    CATBOOST_DEBUG_LOG << "APRICOT MEMORY COPY STAGE OPERATION WRITE ASYNC 1" << Endl;
+                    //CATBOOST_DEBUG_LOG << "APRICOT MEMORY COPY STAGE OPERATION WRITE ASYNC 1" << Endl;
                     State.WriteDoneEvent = State.Manager->WriteAsync((const char*)State.BufferToSend.Get(), writeSize, RemoteHost, Tag);
                     State.IsRemoteCopyComplete = false;
                 }
@@ -348,10 +348,10 @@ namespace NCudaLib {
 #endif
 
                     if (IsRecv) {
-                        CATBOOST_DEBUG_LOG << "APRICOT MEMORY COPY STAGE OPERATION READ ASYNC 3" << Endl;
+                        //CATBOOST_DEBUG_LOG << "APRICOT MEMORY COPY STAGE OPERATION READ ASYNC 3" << Endl;
                         State.Requests.push_back(manager.ReadAsync((char*)(Buffer + offset), sizeof(T) * size, RemoteHost, Tag));
                     } else {
-                        CATBOOST_DEBUG_LOG << "APRICOT MEMORY COPY STAGE OPERATION WRITE ASYNC 2" << Endl;
+                        //CATBOOST_DEBUG_LOG << "APRICOT MEMORY COPY STAGE OPERATION WRITE ASYNC 2" << Endl;
                         State.Requests.push_back(manager.WriteAsync((const char*)(Buffer + offset), sizeof(T) * size, RemoteHost, Tag));
                     }
                 }

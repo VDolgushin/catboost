@@ -289,6 +289,7 @@ namespace NCudaLib {
         }
 
         TReducer& operator()(TBuffer& data) {
+            CATBOOST_DEBUG_LOG << "APRICOT TREDUCER TREE" << Endl;
             Y_UNUSED(data);
             return *this;
         }
@@ -449,6 +450,9 @@ namespace NCudaLib {
         TReducer& operator()(TBuffer& data,
                              const TStripeMapping& resultMapping,
                              const bool compressFlag = false) {
+
+        CATBOOST_DEBUG_LOG << "APRICOT TREDUCER" << Endl;
+        
 #ifndef USE_MPI
             Y_UNUSED(compressFlag);
 #endif
@@ -563,6 +567,9 @@ inline void ReduceScatter(TCudaBuffer<T, NCudaLib::TStripeMapping>& data,
                           NCudaLib::TStripeMapping& reducedMapping,
                           bool compress,
                           ui32 streamId) {
+    CATBOOST_DEBUG_LOG << "APRICOT REDUCE SCATTER" << Endl;
+
+
     const bool isPowerOfTwoDevice = IsPowerOf2(NCudaLib::GetCudaManager().GetDeviceCount());
     //TODO(noxoomo): tree-reduce for non power of two devices + performance check
     if (isPowerOfTwoDevice) {
