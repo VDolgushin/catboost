@@ -64,7 +64,7 @@ namespace NCatboostCuda {
                 {
                     auto guard = profiler.Profile(TStringBuilder() << "Reduce " << ReducedHistograms.GetObjectsSlice().Size() << " histograms");
 
-                    CATBOOST_DEBUG_LOG << "APRICOT REDUCE SCATTER HISTOGRAM HELPERS" << Endl;
+                    //CATBOOST_DEBUG_LOG << "APRICOT REDUCE SCATTER HISTOGRAM HELPERS" << Endl;
 
                     ReduceScatter(ReducedHistograms,
                                   reducedMapping,

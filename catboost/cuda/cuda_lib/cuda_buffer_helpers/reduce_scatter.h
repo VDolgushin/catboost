@@ -451,7 +451,7 @@ namespace NCudaLib {
                              const TStripeMapping& resultMapping,
                              const bool compressFlag = false) {
 
-        //CATBOOST_DEBUG_LOG << "APRICOT TREDUCER" << Endl;
+            CATBOOST_DEBUG_LOG << "APRICOT REDUCE OEPRATOR 1" << Endl;
         
 #ifndef USE_MPI
             Y_UNUSED(compressFlag);
@@ -544,6 +544,9 @@ namespace NCudaLib {
         }
 
         TReducer& operator()(TBuffer& data, bool compressFlag = false) {
+
+            CATBOOST_DEBUG_LOG << "APRICOT REDUCE OEPRATOR 2" << Endl;
+
             TStripeMapping mapping = data.GetMapping();
             TStripeMapping afterMapping = TStripeMapping::SplitBetweenDevices(mapping.DeviceSlice(0).Size(), mapping.SingleObjectSize());
             return (*this)(data, afterMapping, compressFlag);
