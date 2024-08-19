@@ -1222,6 +1222,9 @@ namespace NCatboostCuda {
             }
 
             auto reducedMapping = ComputeByBlocksHelper.ReducedBlockHistogramsMapping(blockId, leavesCount, statsCount);
+
+            CATBOOST_DEBUG_LOG << "APRICOT REDUCE SCATTER SPLIT PROPERTIES HELPER" << Endl;
+
             ReduceScatter(blockHistograms,
                           reducedMapping,
                           false,

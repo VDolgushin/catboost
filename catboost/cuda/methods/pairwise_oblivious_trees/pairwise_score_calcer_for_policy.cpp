@@ -247,6 +247,8 @@ NCatboostCuda::TComputePairwiseScoresHelper& NCatboostCuda::TComputePairwiseScor
             },
                                                                         singleLinearSystemSize);
 
+            CATBOOST_DEBUG_LOG << "APRICOT REDUCE SCATTER SPLIT SCORE CALCER FOR POLICY" << Endl;
+
             ReduceScatter(linearSystem,
                           reducedLinearSystemsMapping,
                           IsReduceCompressed(),
