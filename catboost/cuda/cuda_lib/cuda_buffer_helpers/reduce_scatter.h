@@ -570,7 +570,7 @@ inline void ReduceScatter(TCudaBuffer<T, NCudaLib::TStripeMapping>& data,
                           NCudaLib::TStripeMapping& reducedMapping,
                           bool compress,
                           ui32 streamId) {
-    //CATBOOST_DEBUG_LOG << "APRICOT REDUCE SCATTER" << Endl;
+    CATBOOST_DEBUG_LOG << "APRICOT REDUCE SCATTER" << Endl;
 
 
     const bool isPowerOfTwoDevice = IsPowerOf2(NCudaLib::GetCudaManager().GetDeviceCount());
