@@ -451,7 +451,7 @@ namespace NCudaLib {
                              const TStripeMapping& resultMapping,
                              const bool compressFlag = false) {
 
-            CATBOOST_DEBUG_LOG << "APRICOT REDUCE OEPRATOR 1" << Endl;
+            CATBOOST_DEBUG_LOG << "APRICOT REDUCE OEPRATOR 1 START" << "        HOST:" << GetHostId() << Endl;
         
 #ifndef USE_MPI
             Y_UNUSED(compressFlag);
@@ -461,12 +461,17 @@ namespace NCudaLib {
             const auto& beforeMapping = data.GetMapping();
             const ui64 devCount = GetDeviceCount();
 
+            CATBOOST_DEBUG_LOG << "APRICOT REDUCE OEPRATOR DEV COUNT: "<< devCount << "        HOST:" << GetHostId() << Endl;
+
             if (devCount == 1) {
                 return *this;
             }
 
             {
                 ui64 firstDevSize = beforeMapping.DeviceSlice(0).Size();
+
+                CATBOOST_DEBUG_LOG << "APRICOT REDUCE OEPRATOR DEV SIZE: "<< firstDevSize << "        HOST:" << GetHostId() << Endl;
+
                 for (auto dev : beforeMapping.NonEmptyDevices()) {
                     CB_ENSURE(beforeMapping.DeviceSlice(dev).Size() == firstDevSize,
                               "Error: Buffer dev sizes should be equal for reduce");
@@ -476,6 +481,9 @@ namespace NCudaLib {
             }
 
             TPassTasksGenerator<ReduceType> tasksGenerator(resultMapping, devCount);
+
+            CATBOOST_DEBUG_LOG << "APRICOT REDUCE OEPRATOR PASS COUNT: "<< tasksGenerator.GetPassCount() << "        HOST:" << GetHostId() << Endl;
+
             for (ui32 pass = 0; pass < tasksGenerator.GetPassCount(); ++pass) {
                 auto tasks = tasksGenerator.PassTasks(pass);
                 TStreamSectionTaskLauncher streamSectionLauncher;
@@ -495,6 +503,9 @@ namespace NCudaLib {
                                                 task.WriteDevice);
 
                     const bool isInterHostReduce = manager.GetDeviceId(task.ReadDevice).HostId != manager.GetDeviceId(task.WriteDevice).HostId;
+
+                    CATBOOST_DEBUG_LOG << "APRICOT REDUCE OEPRATOR IS INTER HOST REDUCE: "<< isInterHostReduce << "        HOST:" << GetHostId() << Endl;
+
                     if (isInterHostReduce) {
 #if defined(USE_MPI)
                         const int tag = GetMpiManager().NextCommunicationTag();
@@ -510,6 +521,8 @@ namespace NCudaLib {
 
                         kernels[task.ReadDevice].RemoteReduces.push_back(std::move(sendTask));
 
+                        CATBOOST_DEBUG_LOG << "APRICOT REDUCE OEPRATOR READ DEVICE: "<< task.ReadDevice << "        HOST:" << GetHostId() << Endl;
+
                         typename TKernel::TRemoteHostReduce receiveTask;
                         receiveTask.Tag = tag;
                         receiveTask.IsSendTask = false;
@@ -517,6 +530,9 @@ namespace NCudaLib {
                         receiveTask.Dest = toBuffer;
                         receiveTask.Compress = compressFlag;
                         kernels[task.WriteDevice].RemoteReduces.push_back(std::move(receiveTask));
+
+                        CATBOOST_DEBUG_LOG << "APRICOT REDUCE OEPRATOR WRITE DEVICE: "<< task.WriteDevice << "        HOST:" << GetHostId() << Endl;
+
 #else
                         CB_ENSURE(false, "MPI support is not enabled");
 #endif
@@ -527,6 +543,8 @@ namespace NCudaLib {
                         kernels[task.WriteDevice].LocalReduces.push_back(std::move(receiveTask));
                     }
                 }
+
+                CATBOOST_DEBUG_LOG << "APRICOT REDUCE OEPRATOR STREAM: "<< Stream << "        HOST:" << GetHostId() << Endl;
 
                 streamSectionLauncher.LaunchTask(workingDevs.Build(), [&](ui32 dev) {
                     return std::move(kernels[dev]);
@@ -543,6 +561,7 @@ namespace NCudaLib {
             using TMemShiftKernel = ::NKernelHost::TShiftMemoryKernel<T>;
             LaunchKernels<TMemShiftKernel>(resultMapping.NonEmptyDevices(), Stream, data, localShifts);
             TBuffer::SetMapping(resultMapping, data, false);
+            CATBOOST_DEBUG_LOG << "APRICOT REDUCE OEPRATOR 1 END" << Endl;
             return *this;
         }
 
