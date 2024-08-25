@@ -490,6 +490,8 @@ namespace NCudaLib {
 
                 TVector<TKernel> kernels(devCount);
                 TDevicesListBuilder workingDevs;
+                
+                CATBOOST_DEBUG_LOG << "APRICOT REDUCE OEPRATOR TASKS COUNT: "<< tasks.size() << "        HOST:" << GetHostId() << Endl;
 
                 for (const TReduceTask& task : tasks) {
                     auto fromView = data.SliceView(task.FromSlice);
