@@ -174,7 +174,7 @@ namespace NCudaLib {
                 reinterpret_cast<TLocalQueue*>(TaskQueue)->AddTask(std::move(cmd));
             } else {
 #if defined(USE_MPI)
-                reinterpret_cast<TRemoteQueue*>(TaskQueue)->AddTask(std::move(cmd));
+                reinterpret_cast<TRemoteQueue*>(TaskQueue)->AddTask(std::move(cmd));    // у нас mpi в ремоут кьюе добавляем по сему
 #else
                 CB_ENSURE(false, "Remote device support is not enabled");
 #endif

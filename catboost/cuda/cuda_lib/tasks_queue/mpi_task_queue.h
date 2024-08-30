@@ -106,7 +106,7 @@ namespace NCudaLib {
         }
 
         template <class TTask>
-        void AddTask(THolder<TTask>&& task) {
+        void AddTask(THolder<TTask>&& task) {   // вот это   типа по итогу вызываем?
             ForwardTask(*task);
         }
 
@@ -131,7 +131,7 @@ namespace NCudaLib {
             //CATBOOST_DEBUG_LOG << "APRICOT MPI TASK QUEUE SENT TASK"  << Endl;
 
             Manager.SendTask(DeviceId,
-                             std::move(serializedTask));
+                             std::move(serializedTask));    //тута типа
         }
     };
 

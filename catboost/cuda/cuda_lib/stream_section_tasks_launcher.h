@@ -42,7 +42,7 @@ namespace NCudaLib {
                               ui32 stream) {
             using TTask = TStreamSectionKernelTask<TKernel>;
             auto task = MakeHolder<TTask>(std::move(kernel), sectionConfig, stream);
-            device->AddTask(std::move(task));
+            device->AddTask(std::move(task));       // из single device
         }
 
         template <class TTaskProvider>

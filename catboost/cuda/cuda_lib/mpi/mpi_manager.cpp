@@ -114,7 +114,7 @@ namespace NCudaLib {
     }
 
     void TMpiManager::SendTask(const TDeviceId& deviceId,
-                               TSerializedTask&& task) {
+                               TSerializedTask&& task) {        //task = Tbuffer
         //CATBOOST_DEBUG_LOG << "APRICOT SEND TASK" << Endl;
 
         Y_ASSERT(IsMaster());

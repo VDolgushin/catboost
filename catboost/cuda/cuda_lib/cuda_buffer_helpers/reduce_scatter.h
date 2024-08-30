@@ -114,7 +114,7 @@ namespace NCudaLib {
 
 #if defined(USE_MPI)
         struct TRemoteHostReduce {
-            NKernelHost::TCudaBufferPtr<T> Source;
+            NKernelHost::TCudaBufferPtr<T> Source;      //указатели на куда буфферы
             NKernelHost::TCudaBufferPtr<T> Dest;
             int Tag = -1;
             bool IsSendTask = false;
@@ -271,9 +271,9 @@ namespace NCudaLib {
         template <class TBuffer, EReduceAlgorithm>
         friend class TReducer;
 
-        TVector<TLocalHostReduce> LocalReduces;
+        TVector<TLocalHostReduce> LocalReduces;     // а это локальные
 #if defined(USE_MPI)
-        TVector<TRemoteHostReduce> RemoteReduces;
+        TVector<TRemoteHostReduce> RemoteReduces;   //вот сюда пушатся
 #endif
     };
 
@@ -488,16 +488,19 @@ namespace NCudaLib {
                 auto tasks = tasksGenerator.PassTasks(pass);
                 TStreamSectionTaskLauncher streamSectionLauncher;
 
-                TVector<TKernel> kernels(devCount);
+                TVector<TKernel> kernels(devCount);             //TReduceBinaryStreamTask
                 TDevicesListBuilder workingDevs;
                 
                 CATBOOST_DEBUG_LOG << "APRICOT REDUCE OEPRATOR TASKS COUNT: "<< tasks.size() << "        HOST:" << GetHostId() << Endl;
 
                 for (const TReduceTask& task : tasks) {
-                    auto fromView = data.SliceView(task.FromSlice);
-                    auto toView = data.SliceView(task.ToSlice);
-                    auto fromBuffer = fromView.At(task.ReadDevice);
+                    auto fromView = data.SliceView(task.FromSlice);     //data и fromview это кудабафферы слайсы это участки памяти?
+                    auto toView = data.SliceView(task.ToSlice);         
+                    auto fromBuffer = fromView.At(task.ReadDevice);     //Собственно получаем указатели на кудабафферы вроде как, см TRemoteHostReduce
                     auto toBuffer = toView.At(task.WriteDevice);
+
+                    CATBOOST_DEBUG_LOG << "APRICOT REDUCE OEPRATOR SOURCE DATA SIZE: "<< fromBuffer.GetTotalDataSize()  << Endl;
+                    CATBOOST_DEBUG_LOG << "APRICOT REDUCE OEPRATOR DEST DATA SIZE: "<< toBuffer.GetTotalDataSize()  << Endl;
 
                     workingDevs.AddDevice(task.ReadDevice);
                     workingDevs.AddDevice(task.WriteDevice);
@@ -548,7 +551,7 @@ namespace NCudaLib {
 
                 CATBOOST_DEBUG_LOG << "APRICOT REDUCE OEPRATOR STREAM: "<< Stream << "        HOST:" << GetHostId() << Endl;
 
-                streamSectionLauncher.LaunchTask(workingDevs.Build(), [&](ui32 dev) {
+                streamSectionLauncher.LaunchTask(workingDevs.Build(), [&](ui32 dev) {   // вот эта шняга (streamSectionLauncher) тот раз из тех откуда mpi вызывается вроде
                     return std::move(kernels[dev]);
                 },
                                                  Stream);
