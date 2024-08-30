@@ -499,8 +499,8 @@ namespace NCudaLib {
                     auto fromBuffer = fromView.At(task.ReadDevice);     //Собственно получаем указатели на кудабафферы вроде как, см TRemoteHostReduce
                     auto toBuffer = toView.At(task.WriteDevice);
 
-                    CATBOOST_DEBUG_LOG << "APRICOT REDUCE OEPRATOR SOURCE DATA SIZE: "<< fromBuffer.GetTotalDataSize()  << Endl;
-                    CATBOOST_DEBUG_LOG << "APRICOT REDUCE OEPRATOR DEST DATA SIZE: "<< toBuffer.GetTotalDataSize()  << Endl;
+                    CATBOOST_DEBUG_LOG << "APRICOT REDUCE OEPRATOR SOURCE DATA SIZE: "<< fromBuffer.Size()  << Endl;
+                    CATBOOST_DEBUG_LOG << "APRICOT REDUCE OEPRATOR DEST DATA SIZE: "<< toBuffer.Size()  << Endl;
 
                     workingDevs.AddDevice(task.ReadDevice);
                     workingDevs.AddDevice(task.WriteDevice);
