@@ -210,8 +210,12 @@ namespace NCudaLib {
                         //ncclSend(request.Task.Data(), size, ncclChar, 1, NccclComm, NcclCudaStream);
                         //CATBOOST_DEBUG_LOG << "NCCLSEND APRICOT OK APRICOT END" << Endl;
 
-                        CATBOOST_DEBUG_LOG << "APRICOT MPI SEND SIZE: " << size << Endl;
+                        //CATBOOST_DEBUG_LOG << "APRICOT MPI SEND SIZE: " << size << Endl;
 
+
+                        if(readRequest.Tag != 1){
+                            CATBOOST_DEBUG_LOG << "APRICOT ALERT SEND TAG: " << readRequest.Tag << Endl;
+                        }
                         if (UseBSendForTasks) {
                             MPI_SAFE_CALL(MPI_Bsend(request.Task.Data(), size, MPI_CHAR,
                                                     deviceId.HostId, GetTaskTag(deviceId),
@@ -243,16 +247,16 @@ namespace NCudaLib {
                     //ncclRecv(readRequest.Data, readRequest.DataSize, ncclChar, 0, NccclComm, NcclCudaStream);
                     //CATBOOST_DEBUG_LOG << "NCCLRECV APRICOT OK APRICOT END" << Endl;
 
-                    CATBOOST_DEBUG_LOG << "APRICOT MPI RECV SIZE: " << readRequest.DataSize << Endl;
+                    //CATBOOST_DEBUG_LOG << "APRICOT MPI RECV SIZE: " << readRequest.DataSize << Endl;
 
                     MPI_SAFE_CALL(MPI_Irecv(readRequest.Data, readRequest.DataSize,
                                             MPI_CHAR, readRequest.SourceRank, readRequest.Tag,
                                             Communicator,
                                             &readRequest.Request->Request));
 
-                    // if(readRequest.Tag != 1){
-                    //     CATBOOST_DEBUG_LOG << "APRICOT ALERT RECV TAG: " << readRequest.Tag << Endl;
-                    // }
+                    if(readRequest.Tag != 1){
+                        CATBOOST_DEBUG_LOG << "APRICOT ALERT RECV TAG: " << readRequest.Tag << Endl;
+                    }
 
                     readRequest.Request->SetState(TMpiRequest::EState::Running);
                     if (InvokeRunningRequest(readRequest.Request.Get()) == TMpiRequest::EState::Running) {

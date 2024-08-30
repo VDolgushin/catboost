@@ -451,7 +451,7 @@ namespace NCudaLib {
                              const TStripeMapping& resultMapping,
                              const bool compressFlag = false) {
 
-            CATBOOST_DEBUG_LOG << "APRICOT REDUCE OEPRATOR 1 START" << "        HOST:" << GetHostId() << Endl;
+            CATBOOST_DEBUG_LOG << "APRICOT REDUCE OPERATOR 1 START" << "        HOST:" << GetHostId() << Endl;
         
 #ifndef USE_MPI
             Y_UNUSED(compressFlag);
@@ -461,7 +461,7 @@ namespace NCudaLib {
             const auto& beforeMapping = data.GetMapping();
             const ui64 devCount = GetDeviceCount();
 
-            CATBOOST_DEBUG_LOG << "APRICOT REDUCE OEPRATOR DEV COUNT: "<< devCount << "        HOST:" << GetHostId() << Endl;
+            CATBOOST_DEBUG_LOG << "APRICOT REDUCE OPERATOR DEV COUNT: "<< devCount << "        HOST:" << GetHostId() << Endl;
 
             if (devCount == 1) {
                 return *this;
@@ -470,7 +470,7 @@ namespace NCudaLib {
             {
                 ui64 firstDevSize = beforeMapping.DeviceSlice(0).Size();
 
-                CATBOOST_DEBUG_LOG << "APRICOT REDUCE OEPRATOR DEV SIZE: "<< firstDevSize << "        HOST:" << GetHostId() << Endl;
+                CATBOOST_DEBUG_LOG << "APRICOT REDUCE OPERATOR DEV SIZE: "<< firstDevSize << "        HOST:" << GetHostId() << Endl;
 
                 for (auto dev : beforeMapping.NonEmptyDevices()) {
                     CB_ENSURE(beforeMapping.DeviceSlice(dev).Size() == firstDevSize,
@@ -482,7 +482,7 @@ namespace NCudaLib {
 
             TPassTasksGenerator<ReduceType> tasksGenerator(resultMapping, devCount);
 
-            CATBOOST_DEBUG_LOG << "APRICOT REDUCE OEPRATOR PASS COUNT: "<< tasksGenerator.GetPassCount() << "        HOST:" << GetHostId() << Endl;
+            CATBOOST_DEBUG_LOG << "APRICOT REDUCE OPERATOR PASS COUNT: "<< tasksGenerator.GetPassCount() << "        HOST:" << GetHostId() << Endl;
 
             for (ui32 pass = 0; pass < tasksGenerator.GetPassCount(); ++pass) {
                 auto tasks = tasksGenerator.PassTasks(pass);
@@ -491,7 +491,7 @@ namespace NCudaLib {
                 TVector<TKernel> kernels(devCount);             //TReduceBinaryStreamTask
                 TDevicesListBuilder workingDevs;
                 
-                CATBOOST_DEBUG_LOG << "APRICOT REDUCE OEPRATOR TASKS COUNT: "<< tasks.size() << "        HOST:" << GetHostId() << Endl;
+                CATBOOST_DEBUG_LOG << "APRICOT REDUCE OPERATOR TASKS COUNT: "<< tasks.size() << "        HOST:" << GetHostId() << Endl;
 
                 for (const TReduceTask& task : tasks) {
                     auto fromView = data.SliceView(task.FromSlice);     //data и fromview это кудабафферы слайсы это участки памяти?
@@ -499,8 +499,8 @@ namespace NCudaLib {
                     auto fromBuffer = fromView.At(task.ReadDevice);     //Собственно получаем указатели на кудабафферы вроде как, см TRemoteHostReduce
                     auto toBuffer = toView.At(task.WriteDevice);
 
-                    CATBOOST_DEBUG_LOG << "APRICOT REDUCE OEPRATOR SOURCE DATA SIZE: "<< fromBuffer.Size()  << Endl;
-                    CATBOOST_DEBUG_LOG << "APRICOT REDUCE OEPRATOR DEST DATA SIZE: "<< toBuffer.Size()  << Endl;
+                    CATBOOST_DEBUG_LOG << "APRICOT REDUCE OPERATOR SOURCE DATA SIZE: "<< fromBuffer.Size()  << Endl;
+                    CATBOOST_DEBUG_LOG << "APRICOT REDUCE OPERATOR DEST DATA SIZE: "<< toBuffer.Size()  << Endl;
 
                     workingDevs.AddDevice(task.ReadDevice);
                     workingDevs.AddDevice(task.WriteDevice);
@@ -509,13 +509,13 @@ namespace NCudaLib {
 
                     const bool isInterHostReduce = manager.GetDeviceId(task.ReadDevice).HostId != manager.GetDeviceId(task.WriteDevice).HostId;
 
-                    CATBOOST_DEBUG_LOG << "APRICOT REDUCE OEPRATOR IS INTER HOST REDUCE: "<< isInterHostReduce << "        HOST:" << GetHostId() << Endl;
+                    CATBOOST_DEBUG_LOG << "APRICOT REDUCE OPERATOR IS INTER HOST REDUCE: "<< isInterHostReduce << "        HOST:" << GetHostId() << Endl;
 
                     if (isInterHostReduce) {
 #if defined(USE_MPI)
                         const int tag = GetMpiManager().NextCommunicationTag();
 
-                        CATBOOST_DEBUG_LOG << "APRICOT TAG: " << tag << Endl;
+                        CATBOOST_DEBUG_LOG << "APRICOT REDUCE OPERATOR TAG: " << tag << Endl;
 
                         typename TKernel::TRemoteHostReduce sendTask;
                         sendTask.Tag = tag;
@@ -526,7 +526,7 @@ namespace NCudaLib {
 
                         kernels[task.ReadDevice].RemoteReduces.push_back(std::move(sendTask));
 
-                        CATBOOST_DEBUG_LOG << "APRICOT REDUCE OEPRATOR READ DEVICE: "<< task.ReadDevice << "        HOST:" << GetHostId() << Endl;
+                        CATBOOST_DEBUG_LOG << "APRICOT REDUCE OPERATOR READ DEVICE: "<< task.ReadDevice << "        HOST:" << GetHostId() << Endl;
 
                         typename TKernel::TRemoteHostReduce receiveTask;
                         receiveTask.Tag = tag;
@@ -536,7 +536,7 @@ namespace NCudaLib {
                         receiveTask.Compress = compressFlag;
                         kernels[task.WriteDevice].RemoteReduces.push_back(std::move(receiveTask));
 
-                        CATBOOST_DEBUG_LOG << "APRICOT REDUCE OEPRATOR WRITE DEVICE: "<< task.WriteDevice << "        HOST:" << GetHostId() << Endl;
+                        CATBOOST_DEBUG_LOG << "APRICOT REDUCE OPERATOR WRITE DEVICE: "<< task.WriteDevice << "        HOST:" << GetHostId() << Endl;
 
 #else
                         CB_ENSURE(false, "MPI support is not enabled");
@@ -549,7 +549,7 @@ namespace NCudaLib {
                     }
                 }
 
-                CATBOOST_DEBUG_LOG << "APRICOT REDUCE OEPRATOR STREAM: "<< Stream << "        HOST:" << GetHostId() << Endl;
+                CATBOOST_DEBUG_LOG << "APRICOT REDUCE OPERATOR STREAM: "<< Stream << "        HOST:" << GetHostId() << Endl;
 
                 streamSectionLauncher.LaunchTask(workingDevs.Build(), [&](ui32 dev) {   // вот эта шняга (streamSectionLauncher) тот раз из тех откуда mpi вызывается вроде
                     return std::move(kernels[dev]);
@@ -566,13 +566,13 @@ namespace NCudaLib {
             using TMemShiftKernel = ::NKernelHost::TShiftMemoryKernel<T>;
             LaunchKernels<TMemShiftKernel>(resultMapping.NonEmptyDevices(), Stream, data, localShifts);
             TBuffer::SetMapping(resultMapping, data, false);
-            CATBOOST_DEBUG_LOG << "APRICOT REDUCE OEPRATOR 1 END" << Endl;
+            CATBOOST_DEBUG_LOG << "APRICOT REDUCE OPERATOR 1 END" << Endl;
             return *this;
         }
 
         TReducer& operator()(TBuffer& data, bool compressFlag = false) {
 
-            CATBOOST_DEBUG_LOG << "APRICOT REDUCE OEPRATOR 2" << Endl;
+            CATBOOST_DEBUG_LOG << "APRICOT REDUCE OPERATOR 2" << Endl;
 
             TStripeMapping mapping = data.GetMapping();
             TStripeMapping afterMapping = TStripeMapping::SplitBetweenDevices(mapping.DeviceSlice(0).Size(), mapping.SingleObjectSize());
