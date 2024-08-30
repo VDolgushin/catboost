@@ -213,8 +213,8 @@ namespace NCudaLib {
                         //CATBOOST_DEBUG_LOG << "APRICOT MPI SEND SIZE: " << size << Endl;
 
 
-                        if(readRequest.Tag != 1){
-                            CATBOOST_DEBUG_LOG << "APRICOT ALERT SEND TAG: " << readRequest.Tag << Endl;
+                        if(GetTaskTag(deviceId) != 1){
+                            CATBOOST_DEBUG_LOG << "APRICOT ALERT SEND TAG: " << GetTaskTag(deviceId) << Endl;
                         }
                         if (UseBSendForTasks) {
                             MPI_SAFE_CALL(MPI_Bsend(request.Task.Data(), size, MPI_CHAR,
