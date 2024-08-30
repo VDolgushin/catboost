@@ -499,9 +499,6 @@ namespace NCudaLib {
                     auto fromBuffer = fromView.At(task.ReadDevice);     //Собственно получаем указатели на кудабафферы вроде как, см TRemoteHostReduce
                     auto toBuffer = toView.At(task.WriteDevice);
 
-                    CATBOOST_DEBUG_LOG << "APRICOT REDUCE OPERATOR SOURCE DATA SIZE: "<< fromBuffer.Size()  << Endl;
-                    CATBOOST_DEBUG_LOG << "APRICOT REDUCE OPERATOR DEST DATA SIZE: "<< toBuffer.Size()  << Endl;
-
                     workingDevs.AddDevice(task.ReadDevice);
                     workingDevs.AddDevice(task.WriteDevice);
                     streamSectionLauncher.Group(task.ReadDevice,
@@ -514,6 +511,9 @@ namespace NCudaLib {
                     if (isInterHostReduce) {
 #if defined(USE_MPI)
                         const int tag = GetMpiManager().NextCommunicationTag();
+
+                        CATBOOST_DEBUG_LOG << "APRICOT REDUCE OPERATOR SOURCE DATA SIZE: "<< fromBuffer.Size() << "   TAG: " << tag << Endl;
+                        CATBOOST_DEBUG_LOG << "APRICOT REDUCE OPERATOR DEST DATA SIZE: "<< toBuffer.Size()  << "   TAG: " << tag << Endl;
 
                         CATBOOST_DEBUG_LOG << "APRICOT REDUCE OPERATOR TAG: " << tag << Endl;
 
