@@ -257,7 +257,7 @@ namespace NCudaLib {
                     }
 
                     if(readRequest.Tag == 56319){
-                        Sleep(1000);
+                        sleep(1000);
                     }
 
                     MPI_SAFE_CALL(MPI_Irecv(readRequest.Data, readRequest.DataSize,
