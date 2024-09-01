@@ -8,6 +8,9 @@
 #include <catboost/cuda/cuda_lib/tasks_queue/mpi_task_queue.h>
 #include <library/cpp/blockcodecs/codecs.h>
 
+
+#include<unistd.h>
+
 namespace NCudaLib {
     void TMpiManager::Start(int* argc, char*** argv) {
         CATBOOST_DEBUG_LOG << "APRICOT START" << Endl;
@@ -251,6 +254,10 @@ namespace NCudaLib {
 
                     if(readRequest.Tag != 1){
                         CATBOOST_DEBUG_LOG << "APRICOT MPI RECV TAG: " << readRequest.Tag << "   RECV SIZE: " << readRequest.DataSize << Endl;
+                    }
+
+                    if(readRequest.Tag == 56319){
+                        Sleep(1000);
                     }
 
                     MPI_SAFE_CALL(MPI_Irecv(readRequest.Data, readRequest.DataSize,
