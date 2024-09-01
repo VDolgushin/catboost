@@ -76,6 +76,9 @@ namespace NCatboostCuda {
 
                 auto guard = profiler.Profile(
                     TStringBuilder() << "Find optimal split for #" << DataSet->GetBinFeatures(Policy).size());
+
+                CATBOOST_DEBUG_LOG << "APRICOT FIND OPTIMAL SPLIT HISTOGRAM HELPERS START" << Endl; //all here
+
                 FindOptimalSplit(binFeatures,
                                  catFeatureWeights,
                                  featureWeights,
@@ -93,6 +96,8 @@ namespace NCatboostCuda {
                                  seed,
                                  true /*gathered by leaves */,
                                  streamId);
+
+                CATBOOST_DEBUG_LOG << "APRICOT FIND OPTIMAL SPLIT HISTOGRAM HELPERS END" << Endl; 
             }
         }
         return *this;
