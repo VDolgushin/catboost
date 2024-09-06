@@ -525,7 +525,7 @@ namespace NCudaLib {
                         ncclCommInitRank(&NcclComm, HostCount, NcclId, HostId);
                         ncclGroupStart();
                         ncclSend(fromBuffer.get(), fromBuffer.size(),ncclChar, manager.GetDeviceId(task.ReadDevice).HostId, NcclComm, NcclCudaStream)
-                        ncclRecv(toBuffer.get(), toBuffer.size(), recvtype, manager.GetDeviceId(task.ReadDevice).HostId, NcclComm, NcclCudaStream);
+                        ncclRecv(toBuffer.get(), toBuffer.size(), ncclChar, manager.GetDeviceId(task.ReadDevice).HostId, NcclComm, NcclCudaStream);
                         ncclGroupEnd();
 
 #else
