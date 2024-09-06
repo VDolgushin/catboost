@@ -24,8 +24,8 @@ namespace NCudaLib {
 
         MPI_SAFE_CALL(MPI_Comm_size(Communicator, &HostCount));
         MPI_SAFE_CALL(MPI_Comm_rank(Communicator, &HostId));
-
-
+        if (HostId == 0) ncclGetUniqueId(&NcclId);
+        MPI_SAFE_CALL(MPI_Bcast((void *)&NcclId, sizeof(NcclId), MPI_BYTE, 0, Communicator));
         // uint64_t hostHashs[HostCount];
         // char hostname[1024];
         // getHostName(hostname, 1024);
@@ -36,13 +36,13 @@ namespace NCudaLib {
         //     if (hostHashs[p] == hostHashs[HostId]) NcclLocalRank++;
         // }
 
-        if (HostId == 0) ncclGetUniqueId(&NcclId);
-        MPI_SAFE_CALL(MPI_Bcast((void *)&NcclId, sizeof(NcclId), MPI_BYTE, 0, Communicator));
-        //CUDACHECK(cudaSetDevice(NcclLocalRank));
-        CUDACHECK(cudaMalloc(&NcclSenBuff, BufferSize * sizeof(char)));
-        CUDACHECK(cudaMalloc(&NcclRecvBuff, BufferSize * sizeof(char)));
-        CUDACHECK(cudaStreamCreate(&NcclCudaStream));
-        ncclCommInitRank(&NccclComm, HostCount, NcclId, HostId);
+        // if (HostId == 0) ncclGetUniqueId(&NcclId);
+        // MPI_SAFE_CALL(MPI_Bcast((void *)&NcclId, sizeof(NcclId), MPI_BYTE, 0, Communicator));
+        // //CUDACHECK(cudaSetDevice(NcclLocalRank));
+        // CUDACHECK(cudaMalloc(&NcclSenBuff, BufferSize * sizeof(char)));
+        // CUDACHECK(cudaMalloc(&NcclRecvBuff, BufferSize * sizeof(char)));
+        // CUDACHECK(cudaStreamCreate(&NcclCudaStream));
+        // ncclCommInitRank(&NccclComm, HostCount, NcclId, HostId);
 
 
         CATBOOST_DEBUG_LOG << "Host count: " << HostCount << " Host id: " << HostId << " UPDATED " << Endl;

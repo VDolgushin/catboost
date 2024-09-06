@@ -539,18 +539,15 @@ namespace NCudaLib {
                         // CATBOOST_DEBUG_LOG << "APRICOT REDUCE OPERATOR WRITE DEVICE: "<< task.WriteDevice << "        HOST:" << GetHostId() << Endl;
 
 
-                        ncclUniqueId NcclId;
                         ncclComm_t NcclComm;
                         cudaStream_t NcclCudaStream;
-                        int HostCount;
-                        int HostId;
-                        MPI_Comm_size(MPI_COMM_WORLD, &HostCount);
-                        MPI_Comm_rank(MPI_COMM_WORLD, &HostId);
-                        if (GetMpiManager().GetHostId() == 0) ncclGetUniqueId(&NcclId);
-                        MPI_Bcast((void *)&NcclId, sizeof(NcclId), MPI_BYTE, 0, MPI_COMM_WORLD);
+                        ncclUniqueId NcclId = GetMpiManager().GetNcclId();
+                        int HostCount = GetMpiManager().GetHostCount();
+                        int HostId = GetMpiManager().GetHostId();
+
+                        CATBOOST_DEBUG_LOG << "APRICOT REDUCE OPERATOR NCCL START   Host id: " << HostId << "   Host Count: " << HostCount << Endl;
                         cudaStreamCreate(&NcclCudaStream);
                         ncclCommInitRank(&NcclComm, HostCount, NcclId, HostId);
-                        CATBOOST_DEBUG_LOG << "APRICOT REDUCE OPERATOR NCCL START";
                         ncclGroupStart();
                         ncclSend(fromBuffer.Get(), fromBuffer.Size(),ncclChar, manager.GetDeviceId(task.ReadDevice).HostId, NcclComm, NcclCudaStream);
                         ncclRecv(toBuffer.Get(), toBuffer.Size(), ncclChar, manager.GetDeviceId(task.ReadDevice).HostId, NcclComm, NcclCudaStream);

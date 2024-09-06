@@ -286,6 +286,18 @@ namespace NCudaLib {
         }
         }
 
+        int GetHostId(){
+            return HostId;
+        }
+
+        int GetHostCount(){
+            return HostCount;
+        }
+
+        int GetNcclId(){
+            return NcclId;
+        }
+
 
     private:
         //Every MPI operations are done via proxy thread.
