@@ -524,8 +524,8 @@ namespace NCudaLib {
                         cudaStreamCreate(&NcclCudaStream);
                         ncclCommInitRank(&NcclComm, HostCount, NcclId, HostId);
                         ncclGroupStart();
-                        ncclSend(fromBuffer.Get(), fromBuffer.size(),ncclChar, manager.GetDeviceId(task.ReadDevice).HostId, NcclComm, NcclCudaStream);
-                        ncclRecv(toBuffer.Get(), toBuffer.size(), ncclChar, manager.GetDeviceId(task.ReadDevice).HostId, NcclComm, NcclCudaStream);
+                        ncclSend(fromBuffer.Get(), fromBuffer.Size(),ncclChar, manager.GetDeviceId(task.ReadDevice).HostId, NcclComm, NcclCudaStream);
+                        ncclRecv(toBuffer.Get(), toBuffer.Size(), ncclChar, manager.GetDeviceId(task.ReadDevice).HostId, NcclComm, NcclCudaStream);
                         ncclGroupEnd();
 
 #else
