@@ -510,33 +510,50 @@ namespace NCudaLib {
 
                     if (isInterHostReduce) {
 #if defined(USE_MPI)
-                        const int tag = GetMpiManager().NextCommunicationTag();
+                        // const int tag = GetMpiManager().NextCommunicationTag();
 
-                        CATBOOST_DEBUG_LOG << "APRICOT REDUCE OPERATOR SOURCE DATA SIZE: "<< fromBuffer.Size() << "   TAG: " << tag << Endl;
-                        CATBOOST_DEBUG_LOG << "APRICOT REDUCE OPERATOR DEST DATA SIZE: "<< toBuffer.Size()  << "   TAG: " << tag << Endl;
+                        // CATBOOST_DEBUG_LOG << "APRICOT REDUCE OPERATOR SOURCE DATA SIZE: "<< fromBuffer.Size() << "   TAG: " << tag << Endl;
+                        // CATBOOST_DEBUG_LOG << "APRICOT REDUCE OPERATOR DEST DATA SIZE: "<< toBuffer.Size()  << "   TAG: " << tag << Endl;
 
-                        CATBOOST_DEBUG_LOG << "APRICOT REDUCE OPERATOR TAG: " << tag << Endl;
+                        // CATBOOST_DEBUG_LOG << "APRICOT REDUCE OPERATOR TAG: " << tag << Endl;
 
-                        typename TKernel::TRemoteHostReduce sendTask;
-                        sendTask.Tag = tag;
-                        sendTask.IsSendTask = true;
-                        sendTask.Source = fromBuffer;
-                        sendTask.Dest = toBuffer;
-                        sendTask.Compress = compressFlag;
+                        // typename TKernel::TRemoteHostReduce sendTask;
+                        // sendTask.Tag = tag;
+                        // sendTask.IsSendTask = true;
+                        // sendTask.Source = fromBuffer;
+                        // sendTask.Dest = toBuffer;
+                        // sendTask.Compress = compressFlag;
 
-                        kernels[task.ReadDevice].RemoteReduces.push_back(std::move(sendTask));
+                        // kernels[task.ReadDevice].RemoteReduces.push_back(std::move(sendTask));
 
-                        CATBOOST_DEBUG_LOG << "APRICOT REDUCE OPERATOR READ DEVICE: "<< task.ReadDevice << "        HOST:" << GetHostId() << Endl;
+                        // CATBOOST_DEBUG_LOG << "APRICOT REDUCE OPERATOR READ DEVICE: "<< task.ReadDevice << "        HOST:" << GetHostId() << Endl;
 
-                        typename TKernel::TRemoteHostReduce receiveTask;
-                        receiveTask.Tag = tag;
-                        receiveTask.IsSendTask = false;
-                        receiveTask.Source = fromBuffer;
-                        receiveTask.Dest = toBuffer;
-                        receiveTask.Compress = compressFlag;
-                        kernels[task.WriteDevice].RemoteReduces.push_back(std::move(receiveTask));
+                        // typename TKernel::TRemoteHostReduce receiveTask;
+                        // receiveTask.Tag = tag;
+                        // receiveTask.IsSendTask = false;
+                        // receiveTask.Source = fromBuffer;
+                        // receiveTask.Dest = toBuffer;
+                        // receiveTask.Compress = compressFlag;
+                        // kernels[task.WriteDevice].RemoteReduces.push_back(std::move(receiveTask));
 
-                        CATBOOST_DEBUG_LOG << "APRICOT REDUCE OPERATOR WRITE DEVICE: "<< task.WriteDevice << "        HOST:" << GetHostId() << Endl;
+                        // CATBOOST_DEBUG_LOG << "APRICOT REDUCE OPERATOR WRITE DEVICE: "<< task.WriteDevice << "        HOST:" << GetHostId() << Endl;
+
+
+                        ncclUniqueId NcclId;
+                        ncclComm_t NcclComm;
+                        cudaStream_t NcclCudaStream;
+                        int HostCount;
+                        int HostId;
+                        MPI_Comm_size(MPI_COMM_WORLD, &HostCount);
+                        MPI_Comm_rank(MPI_COMM_WORLD, &HostId);
+                        if (GetMpiManager().GetHostId() == 0) ncclGetUniqueId(&NcclId);
+                        MPI_Bcast((void *)&NcclId, sizeof(NcclId), MPI_BYTE, 0, MPI_COMM_WORLD);
+                        cudaStreamCreate(&NcclCudaStream);
+                        ncclCommInitRank(&NcclComm, HostCount, NcclId, HostId);
+                        ncclGroupStart();
+                        ncclSend(fromBuffer.Get(), fromBuffer.Size(),ncclChar, manager.GetDeviceId(task.ReadDevice).HostId, NcclComm, NcclCudaStream);
+                        ncclRecv(toBuffer.Get(), toBuffer.Size(), ncclChar, manager.GetDeviceId(task.ReadDevice).HostId, NcclComm, NcclCudaStream);
+                        ncclGroupEnd();
 
 #else
                         CB_ENSURE(false, "MPI support is not enabled");
@@ -549,23 +566,23 @@ namespace NCudaLib {
                     }
                 }
 
-                CATBOOST_DEBUG_LOG << "APRICOT REDUCE OPERATOR STREAM: "<< Stream << "        HOST:" << GetHostId() << Endl;
+                // CATBOOST_DEBUG_LOG << "APRICOT REDUCE OPERATOR STREAM: "<< Stream << "        HOST:" << GetHostId() << Endl;
 
-                streamSectionLauncher.LaunchTask(workingDevs.Build(), [&](ui32 dev) {   // вот эта шняга (streamSectionLauncher) тот раз из тех откуда mpi вызывается вроде
-                    return std::move(kernels[dev]);
-                },
-                                                 Stream);
+                // streamSectionLauncher.LaunchTask(workingDevs.Build(), [&](ui32 dev) {   // вот эта шняга (streamSectionLauncher) тот раз из тех откуда mpi вызывается вроде
+                //     return std::move(kernels[dev]);
+                // },
+                //                                  Stream);
             }
 
-            auto localShifts = manager.CreateDistributedObject<TSlice>(TSlice(0, 0));
-            for (auto dev : resultMapping.NonEmptyDevices()) {
-                auto slice = resultMapping.DeviceSlice(dev);
-                localShifts.Set(dev, slice);
-            }
+            // auto localShifts = manager.CreateDistributedObject<TSlice>(TSlice(0, 0));
+            // for (auto dev : resultMapping.NonEmptyDevices()) {
+            //     auto slice = resultMapping.DeviceSlice(dev);
+            //     localShifts.Set(dev, slice);
+            // }
 
-            using TMemShiftKernel = ::NKernelHost::TShiftMemoryKernel<T>;
-            LaunchKernels<TMemShiftKernel>(resultMapping.NonEmptyDevices(), Stream, data, localShifts);
-            TBuffer::SetMapping(resultMapping, data, false);
+            // using TMemShiftKernel = ::NKernelHost::TShiftMemoryKernel<T>;
+            // LaunchKernels<TMemShiftKernel>(resultMapping.NonEmptyDevices(), Stream, data, localShifts);
+            // TBuffer::SetMapping(resultMapping, data, false);
             CATBOOST_DEBUG_LOG << "APRICOT REDUCE OPERATOR 1 END" << Endl;
             return *this;
         }
