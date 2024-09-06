@@ -493,23 +493,41 @@ namespace NCudaLib {
                     const bool isInterHostReduce = manager.GetDeviceId(task.ReadDevice).HostId != manager.GetDeviceId(task.WriteDevice).HostId;
                     if (isInterHostReduce) {
 #if defined(USE_MPI)
-                        const int tag = GetMpiManager().NextCommunicationTag();
-                        typename TKernel::TRemoteHostReduce sendTask;
-                        sendTask.Tag = tag;
-                        sendTask.IsSendTask = true;
-                        sendTask.Source = fromBuffer;
-                        sendTask.Dest = toBuffer;
-                        sendTask.Compress = compressFlag;
+                        // const int tag = GetMpiManager().NextCommunicationTag();
+                        // typename TKernel::TRemoteHostReduce sendTask;
+                        // sendTask.Tag = tag;
+                        // sendTask.IsSendTask = true;
+                        // sendTask.Source = fromBuffer;
+                        // sendTask.Dest = toBuffer;
+                        // sendTask.Compress = compressFlag;
 
-                        kernels[task.ReadDevice].RemoteReduces.push_back(std::move(sendTask));
+                        // kernels[task.ReadDevice].RemoteReduces.push_back(std::move(sendTask));
 
-                        typename TKernel::TRemoteHostReduce receiveTask;
-                        receiveTask.Tag = tag;
-                        receiveTask.IsSendTask = false;
-                        receiveTask.Source = fromBuffer;
-                        receiveTask.Dest = toBuffer;
-                        receiveTask.Compress = compressFlag;
-                        kernels[task.WriteDevice].RemoteReduces.push_back(std::move(receiveTask));
+                        // typename TKernel::TRemoteHostReduce receiveTask;
+                        // receiveTask.Tag = tag;
+                        // receiveTask.IsSendTask = false;
+                        // receiveTask.Source = fromBuffer;
+                        // receiveTask.Dest = toBuffer;
+                        // receiveTask.Compress = compressFlag;
+                        // kernels[task.WriteDevice].RemoteReduces.push_back(std::move(receiveTask));
+
+
+                        ncclUniqueId NcclId;
+                        ncclComm_t NcclComm;
+                        cudaStream_t NcclCudaStream;
+                        int HostCount;
+                        int HostId;
+                        MPI_Comm_size(MPI_COMM_WORLD, &HostCount);
+                        MPI_Comm_rank(MPI_COMM_WORLD, &HostId);
+                        if (GetMpiManager().GetHostId() == 0) ncclGetUniqueId(&NcclId);
+                        MPI_Bcast((void *)&NcclId, sizeof(NcclId), MPI_BYTE, 0, MPI_COMM_WORLD);
+                        cudaStreamCreate(&NcclCudaStream);
+                        ncclCommInitRank(&NcclComm, HostCount, NcclId, HostId);
+                        ncclGroupStart();
+                        ncclSend(fromBuffer.get(), fromBuffer.size(),ncclChar, manager.GetDeviceId(task.ReadDevice).HostId, NcclComm, NcclCudaStream)
+                        ncclRecv(toBuffer.get(), toBuffer.size(), recvtype, manager.GetDeviceId(task.ReadDevice).HostId, NcclComm, NcclCudaStream);
+                        ncclGroupEnd();
+
 #else
                         CB_ENSURE(false, "MPI support is not enabled");
 #endif
@@ -521,20 +539,20 @@ namespace NCudaLib {
                     }
                 }
 
-                streamSectionLauncher.LaunchTask(workingDevs.Build(), [&](ui32 dev) {
-                    return std::move(kernels[dev]);
-                },
-                                                 Stream);
+                // streamSectionLauncher.LaunchTask(workingDevs.Build(), [&](ui32 dev) {
+                //     return std::move(kernels[dev]);
+                // },
+                //                                  Stream);
             }
 
-            auto localShifts = manager.CreateDistributedObject<TSlice>(TSlice(0, 0));
-            for (auto dev : resultMapping.NonEmptyDevices()) {
-                auto slice = resultMapping.DeviceSlice(dev);
-                localShifts.Set(dev, slice);
-            }
+            // auto localShifts = manager.CreateDistributedObject<TSlice>(TSlice(0, 0));
+            // for (auto dev : resultMapping.NonEmptyDevices()) {
+            //     auto slice = resultMapping.DeviceSlice(dev);
+            //     localShifts.Set(dev, slice);
+            // }
 
-            using TMemShiftKernel = ::NKernelHost::TShiftMemoryKernel<T>;
-            LaunchKernels<TMemShiftKernel>(resultMapping.NonEmptyDevices(), Stream, data, localShifts);
+            // using TMemShiftKernel = ::NKernelHost::TShiftMemoryKernel<T>;
+            // LaunchKernels<TMemShiftKernel>(resultMapping.NonEmptyDevices(), Stream, data, localShifts);
             TBuffer::SetMapping(resultMapping, data, false);
             return *this;
         }

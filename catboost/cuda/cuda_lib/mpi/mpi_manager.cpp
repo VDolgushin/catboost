@@ -10,7 +10,7 @@
 
 namespace NCudaLib {
     void TMpiManager::Start(int* argc, char*** argv) {
-        CATBOOST_DEBUG_LOG << "APRICOT START" << Endl;
+        //CATBOOST_DEBUG_LOG << "APRICOT START" << Endl;
 
         int providedLevel;
         int threadLevel = MPI_THREAD_SERIALIZED;
@@ -33,13 +33,13 @@ namespace NCudaLib {
         //     if (hostHashs[p] == hostHashs[HostId]) NcclLocalRank++;
         // }
 
-        if (HostId == 0) ncclGetUniqueId(&NcclId);
-        MPI_SAFE_CALL(MPI_Bcast((void *)&NcclId, sizeof(NcclId), MPI_BYTE, 0, Communicator));
-        //CUDACHECK(cudaSetDevice(NcclLocalRank));
-        CUDACHECK(cudaMalloc(&NcclSenBuff, BufferSize * sizeof(char)));
-        CUDACHECK(cudaMalloc(&NcclRecvBuff, BufferSize * sizeof(char)));
-        CUDACHECK(cudaStreamCreate(&NcclCudaStream));
-        ncclCommInitRank(&NccclComm, HostCount, NcclId, HostId);
+        // if (HostId == 0) ncclGetUniqueId(&NcclId);
+        // MPI_SAFE_CALL(MPI_Bcast((void *)&NcclId, sizeof(NcclId), MPI_BYTE, 0, Communicator));
+        // CUDACHECK(cudaSetDevice(NcclLocalRank));
+        // CUDACHECK(cudaMalloc(&NcclSenBuff, BufferSize * sizeof(char)));
+        // CUDACHECK(cudaMalloc(&NcclRecvBuff, BufferSize * sizeof(char)));
+        // CUDACHECK(cudaStreamCreate(&NcclCudaStream));
+        // ncclCommInitRank(&NccclComm, HostCount, NcclId, HostId);
 
 
         CATBOOST_DEBUG_LOG << "Host count: " << HostCount << " Host id: " << HostId << " UPDATED " << Endl;
@@ -88,7 +88,7 @@ namespace NCudaLib {
                 }
             }
         } else {
-            CATBOOST_DEBUG_LOG << "Starting slave" << Endl;
+            //CATBOOST_DEBUG_LOG << "Starting slave" << Endl;
             TVector<TCudaDeviceProperties> props = NCudaHelpers::GetDevicesProps();
             Write(reinterpret_cast<const char*>(&deviceCount), deviceCountTypeBytes, 0, 0);
             for (const auto& prop : props) {
@@ -100,7 +100,7 @@ namespace NCudaLib {
     }
 
     void TMpiManager::Stop() {
-        CATBOOST_DEBUG_LOG << "APRICOT STOP" << Endl;
+        //CATBOOST_DEBUG_LOG << "APRICOT STOP" << Endl;
 
         if (IsMaster()) {
             NCudaLib::GetDevicesProvider().FreeDevices();
@@ -115,7 +115,7 @@ namespace NCudaLib {
 
     void TMpiManager::SendTask(const TDeviceId& deviceId,
                                TSerializedTask&& task) {
-        CATBOOST_DEBUG_LOG << "APRICOT SEND TASK" << Endl;
+        //CATBOOST_DEBUG_LOG << "APRICOT SEND TASK" << Endl;
 
         Y_ASSERT(IsMaster());
         TSendTaskRequest request;
@@ -126,7 +126,7 @@ namespace NCudaLib {
     }
 
     TMpiRequestPtr TMpiManager::ReadAsync(char* data, int dataSize, int sourceRank, int tag) {
-        CATBOOST_DEBUG_LOG << "APRICOT READ ASYNC" << Endl;
+        //CATBOOST_DEBUG_LOG << "APRICOT READ ASYNC" << Endl;
 
         TMpiRequestPtr request = new TMpiRequest();
         TMemcpyReceiveRequest readRequest;
@@ -185,7 +185,7 @@ namespace NCudaLib {
     }
 
     void TMpiManager::ProceedRequests() {
-        CATBOOST_DEBUG_LOG << "APRICOT PROCEED REQUESTS" << Endl;
+        //CATBOOST_DEBUG_LOG << "APRICOT PROCEED REQUESTS" << Endl;
 
         bool isMaster = IsMaster();
         while (true) {
