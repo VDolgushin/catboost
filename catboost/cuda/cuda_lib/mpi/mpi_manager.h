@@ -294,7 +294,7 @@ namespace NCudaLib {
             return HostCount;
         }
 
-        int GetNcclId(){
+        ncclUniqueId GetNcclId(){
             return NcclId;
         }
 
