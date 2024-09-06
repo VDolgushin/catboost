@@ -141,7 +141,7 @@ namespace NCudaLib {
     }
 
     TMpiRequestPtr TMpiManager::WriteAsync(const char* data, int dataSize, int destRank, int tag) {
-        CATBOOST_DEBUG_LOG << "APRICOT WRITE ASYNC" << Endl;
+        //CATBOOST_DEBUG_LOG << "APRICOT WRITE ASYNC" << Endl;
 
         TMpiRequestPtr request = new TMpiRequest();
         TMemcpySendRequest sendRequest;
