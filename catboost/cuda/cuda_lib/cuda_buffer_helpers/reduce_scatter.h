@@ -550,6 +550,7 @@ namespace NCudaLib {
                         MPI_Bcast((void *)&NcclId, sizeof(NcclId), MPI_BYTE, 0, MPI_COMM_WORLD);
                         cudaStreamCreate(&NcclCudaStream);
                         ncclCommInitRank(&NcclComm, HostCount, NcclId, HostId);
+                        CATBOOST_DEBUG_LOG << "APRICOT REDUCE OPERATOR NCCL START";
                         ncclGroupStart();
                         ncclSend(fromBuffer.Get(), fromBuffer.Size(),ncclChar, manager.GetDeviceId(task.ReadDevice).HostId, NcclComm, NcclCudaStream);
                         ncclRecv(toBuffer.Get(), toBuffer.Size(), ncclChar, manager.GetDeviceId(task.ReadDevice).HostId, NcclComm, NcclCudaStream);
