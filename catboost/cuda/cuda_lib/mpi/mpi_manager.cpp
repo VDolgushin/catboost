@@ -216,9 +216,10 @@ namespace NCudaLib {
                         //CATBOOST_DEBUG_LOG << "APRICOT MPI SEND SIZE: " << size << Endl;
 
 
-                        if(GetTaskTag(deviceId) == 56319){
-                            sleep(1000);
-                        }
+                        // if(GetTaskTag(deviceId) == 56319){
+                        //     sleep(1000);
+                        // }
+
                         if(GetTaskTag(deviceId) != 1){
                             CATBOOST_DEBUG_LOG << "APRICOT MPI SEND TAG: " << GetTaskTag(deviceId) << "   SEND SIZE: " << size << Endl;
                         }
@@ -259,9 +260,9 @@ namespace NCudaLib {
                         CATBOOST_DEBUG_LOG << "APRICOT MPI RECV TAG: " << readRequest.Tag << "   RECV SIZE: " << readRequest.DataSize << Endl;
                     }
 
-                    if(readRequest.Tag == 56319){
-                        sleep(1000);
-                    }
+                    // if(readRequest.Tag == 56319){
+                    //     sleep(1000);
+                    // }
 
                     MPI_SAFE_CALL(MPI_Irecv(readRequest.Data, readRequest.DataSize,
                                             MPI_CHAR, readRequest.SourceRank, readRequest.Tag,
