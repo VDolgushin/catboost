@@ -216,6 +216,9 @@ namespace NCudaLib {
                         //CATBOOST_DEBUG_LOG << "APRICOT MPI SEND SIZE: " << size << Endl;
 
 
+                        if(GetTaskTag(deviceId) == 56319){
+                            sleep(1000);
+                        }
                         if(GetTaskTag(deviceId) != 1){
                             CATBOOST_DEBUG_LOG << "APRICOT MPI SEND TAG: " << GetTaskTag(deviceId) << "   SEND SIZE: " << size << Endl;
                         }
